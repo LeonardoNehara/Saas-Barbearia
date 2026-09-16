@@ -23,6 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'message' => 'Unauthenticated.',
         ], 401));
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*', 'profissionais', 'profissionais/*') || $request->expectsJson(),
         );
     })->create();
