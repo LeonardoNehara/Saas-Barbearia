@@ -40,4 +40,9 @@ class Estabelecimento extends Model
     {
         return $this->hasMany(Servico::class);
     }
+
+    public function agendamentos(): HasMany
+    {
+        return $this->hasMany(Agendamento::class);
+    }
 }

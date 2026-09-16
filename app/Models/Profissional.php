@@ -51,4 +51,9 @@ class Profissional extends Model
     {
         return $this->hasMany(BloqueioProfissional::class);
     }
+
+    public function agendamentos(): HasMany
+    {
+        return $this->hasMany(Agendamento::class);
+    }
 }
