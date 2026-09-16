@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        if (DB::table('users')->exists()) {
+            throw new RuntimeException('Existem usuarios sem estabelecimento. Defina uma migracao de associacao explicita antes de tornar o vinculo obrigatorio.');
+        }
+
+        Schema::table('users', function (Blueprint $table): void {
+            $table->foreignId('estabelecimento_id')->constrained('estabelecimentos')->restrictOnDelete();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table): void {
+            $table->dropConstrainedForeignId('estabelecimento_id');
+        });
+    }
+};
