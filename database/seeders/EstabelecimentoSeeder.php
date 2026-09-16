@@ -21,13 +21,23 @@ class EstabelecimentoSeeder extends Seeder
                 ['nome' => 'Barbearia Demo'],
             );
 
-            $estabelecimento->users()->firstOrCreate(
+            $admin = $estabelecimento->users()->firstOrCreate(
                 ['email' => 'admin@barbearia-demo.test'],
                 [
                     'name' => 'Admin Demo',
                     'password' => 'demo-local-only',
                 ],
             );
+            $admin->forceFill(['role' => 'admin', 'active' => true])->save();
+
+            $barbeiro = $estabelecimento->users()->firstOrCreate(
+                ['email' => 'barbeiro@barbearia-demo.test'],
+                [
+                    'name' => 'Barbeiro Demo',
+                    'password' => 'demo-local-only',
+                ],
+            );
+            $barbeiro->forceFill(['role' => 'barbeiro', 'active' => true])->save();
         });
     }
 }

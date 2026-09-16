@@ -93,6 +93,64 @@ database/migrations/
 ```
 
 Laravel Boost foi instalado como dependencia de desenvolvimento conforme AGENTS.md.
-Nenhuma biblioteca de UI ou migration de negocio foi adicionada.
+Nenhuma biblioteca de UI foi adicionada.
+
+## Autenticacao, perfis e isolamento por estabelecimento
+
+A base utiliza o guard `web` nativo (sessao) e o provider Eloquent de `User`.
+Nao existem endpoints ou telas de login nesta etapa. Ao implementar o login,
+usar `Auth::attempt` com `email`, `password` e `active => true`, regenerar a
+sessao apos autenticar e aplicar o middleware de status em todas as areas protegidas.
+
+Agrupar futuras rotas autenticadas com `['auth', 'active']` dentro do grupo `web`.
+Para areas administrativas, acrescentar `can:is-admin`. O Gate `is-admin`
+permite apenas administradores ativos; visitantes e barbeiros sao recusados.
+Sem autenticacao, a resposta e JSON 401, inclusive sem o header Accept; usuarios
+inativos recebem JSON 403. O middleware verifica o status em cada requisicao,
+inclusive de sessoes abertas antes da desativacao. Ele nao e global.
+
+`role` aceita apenas `admin` ou `barbeiro` (enum no banco, string no model),
+com default `barbeiro`. `active` tem default true e cast boolean.
+`isAdmin()` e `isBarbeiro()` verificam apenas o perfil; o Gate verifica tambem o status.
+`role` e `active` nao sao mass assignable. Alteracoes devem ser explicitas e
+autorizadas pelo servidor, nunca via `fill($request->all())`.
+
+### Padrao obrigatorio para futuros Controllers e Policies
+
+- Obter o estabelecimento de `$request->user()->estabelecimento_id`, nunca de
+  parametros, headers ou payload enviados pelo cliente.
+- Em listagens, leituras, alteracoes e exclusoes, iniciar a consulta com
+  `Recurso::query()->where('estabelecimento_id', $request->user()->estabelecimento_id)`.
+  Para um ID, aplicar `findOrFail($id)` nessa consulta: um recurso de outro
+  estabelecimento deve responder 404. Nao usar `Recurso::find($id)` sem filtro.
+- Em criacoes, usar a relacao do estabelecimento autenticado para definir a FK
+  no servidor. Aceitar apenas campos explicitamente validados e excluir
+  `estabelecimento_id`, `role` e `active` de payloads comuns.
+- Policies devem verificar novamente a igualdade entre o estabelecimento do
+  usuario e o do recurso, alem de status e permissoes da operacao. Negar acesso
+  entre estabelecimentos com `Response::denyAsNotFound()`.
+- Ser admin nao concede acesso a outro estabelecimento: `is-admin` sozinho
+  nao substitui o filtro da consulta nem a Policy do recurso.
+- Nao confiar em route model binding sem escopo: resolver o recurso dentro da
+  consulta filtrada ou configurar binding explicitamente limitado ao tenant.
+- Testar com dois estabelecimentos que listagens nao vazem dados e que leitura,
+  alteracao, exclusao e tentativa de forjar a FK nao alcancem o outro tenant.
+
+Esse padrao e explicito: nao ha Global Scope, middleware de tenant ou pacote
+de multi-tenancy. As entidades futuras implementarao suas relacoes e Policies.
+
+### Dados locais
+
+`php artisan db:seed` cria ou atualiza os perfis demo somente em `local` ou
+`testing`. Ambos pertencem a Barbearia Demo e ficam ativos:
+
+- Admin Demo: `admin@barbearia-demo.test`, perfil `admin`.
+- Barbeiro Demo: `barbeiro@barbearia-demo.test`, perfil `barbeiro`.
+
+Senha inicial ficticia de ambos: `demo-local-only`, exclusiva de desenvolvimento,
+armazenada como hash. Repetir o seed nao duplica usuarios nem redefine senhas;
+reaplica os perfis e o status ativo das contas demo.
+
+`UserFactory` oferece `admin()`, `barbeiro()`, `active()` e `inactive()`.
 
 Referencia: [ordem de inicializacao e healthchecks do Compose](https://docs.docker.com/compose/how-tos/startup-order/).
