@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['nome', 'telefone', 'email', 'foto', 'descricao', 'user_id'])]
 class Profissional extends Model
@@ -39,5 +40,10 @@ class Profissional extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function horarios(): HasMany
+    {
+        return $this->hasMany(HorarioProfissional::class);
     }
 }
