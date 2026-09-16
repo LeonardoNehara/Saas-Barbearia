@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable(['nome', 'telefone', 'email', 'foto', 'descricao', 'user_id'])]
 class Profissional extends Model
@@ -15,6 +16,12 @@ class Profissional extends Model
     use HasFactory;
 
     protected $table = 'profissionais';
+
+    /** @return BelongsToMany<Servico, $this> */
+    public function servicos(): BelongsToMany
+    {
+        return $this->belongsToMany(Servico::class, 'profissional_servico')->withTimestamps();
+    }
 
     /** @return array<string, string> */
     protected function casts(): array
