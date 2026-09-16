@@ -22,6 +22,7 @@ class EstabelecimentoFactory extends Factory
             'telefone' => fake('pt_BR')->numerify('119########'),
             'email' => fake()->safeEmail(),
             'active' => true,
+            'timezone' => 'America/Sao_Paulo',
             'trial_ends_at' => now()->addDays(14),
         ];
     }
