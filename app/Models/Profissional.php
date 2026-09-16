@@ -46,4 +46,9 @@ class Profissional extends Model
     {
         return $this->hasMany(HorarioProfissional::class);
     }
+
+    public function bloqueios(): HasMany
+    {
+        return $this->hasMany(BloqueioProfissional::class);
+    }
 }
