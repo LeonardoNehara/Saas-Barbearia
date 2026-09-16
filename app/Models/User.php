@@ -18,6 +18,16 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isBarbeiro(): bool
+    {
+        return $this->role === 'barbeiro';
+    }
+
     /** @return BelongsTo<Estabelecimento, $this> */
     public function estabelecimento(): BelongsTo
     {
@@ -32,6 +42,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'active' => 'boolean',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];

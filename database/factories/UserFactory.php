@@ -26,6 +26,8 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'role' => 'barbeiro',
+            'active' => true,
             'estabelecimento_id' => Estabelecimento::factory(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
@@ -33,6 +35,26 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes): array => ['role' => 'admin']);
+    }
+
+    public function barbeiro(): static
+    {
+        return $this->state(fn (array $attributes): array => ['role' => 'barbeiro']);
+    }
+
+    public function active(): static
+    {
+        return $this->state(fn (array $attributes): array => ['active' => true]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes): array => ['active' => false]);
     }
 
     /**
