@@ -25,7 +25,7 @@ Route::middleware(['auth', 'active'])->prefix('profissionais')->name('profission
     Route::put('/{profissional}', [ProfissionalController::class, 'update'])->name('update');
     Route::patch('/{profissional}/status', [ProfissionalController::class, 'toggleStatus'])->name('status');
 
-    Route::get('/{profissional}/horarios',[HorarioProfissionalController::class, 'index'])->name('horarios.index');
-    Route::post('/{profissional}/horarios',[HorarioProfissionalController::class, 'store'])->name('horarios.store');
-    Route::delete('/{profissional}/horarios/{horario}',[HorarioProfissionalController::class, 'destroy'])->name('horarios.destroy');
+    Route::get('/{profissional}/horarios', [HorarioProfissionalController::class, 'index'])->name('horarios.index')->middleware('can:is-admin');
+    Route::post('/{profissional}/horarios', [HorarioProfissionalController::class, 'store'])->name('horarios.store')->middleware('can:is-admin');
+    Route::delete('/{profissional}/horarios/{horario}', [HorarioProfissionalController::class, 'destroy'])->name('horarios.destroy')->middleware('can:is-admin');
 });

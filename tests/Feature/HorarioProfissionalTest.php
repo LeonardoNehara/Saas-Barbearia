@@ -290,4 +290,31 @@ class HorarioProfissionalTest extends TestCase
 
         $response->assertForbidden();
     }
+
+    public function test_barbeiro_nao_pode_administrar_horarios(): void
+    {
+        $barbeiro = User::factory()
+            ->barbeiro()
+            ->active()
+            ->for($this->estabelecimento)
+            ->create();
+
+        $response = $this
+            ->actingAs($barbeiro)
+            ->postJson(
+                route('profissionais.horarios.store', $this->profissional),
+                [
+                    'dia_semana' => 1,
+                    'hora_inicio' => '08:00',
+                    'hora_fim' => '12:00',
+                ]
+            );
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseMissing('horarios_profissionais', [
+            'profissional_id' => $this->profissional->id,
+            'dia_semana' => 1,
+        ]);
+    }
 }
