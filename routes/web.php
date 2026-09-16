@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfissionalController;
 use App\Http\Controllers\ServicoController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HorarioProfissionalController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,7 +25,7 @@ Route::middleware(['auth', 'active'])->prefix('profissionais')->name('profission
     Route::put('/{profissional}', [ProfissionalController::class, 'update'])->name('update');
     Route::patch('/{profissional}/status', [ProfissionalController::class, 'toggleStatus'])->name('status');
 
-    Route::get('/profissionais/{profissional}/horarios',[HorarioProfissionalController::class, 'index']);
-    Route::post('/profissionais/{profissional}/horarios',[HorarioProfissionalController::class, 'store']);
-    Route::delete('/profissionais/{profissional}/horarios/{horario}',[HorarioProfissionalController::class, 'destroy']);
+    Route::get('/{profissional}/horarios',[HorarioProfissionalController::class, 'index'])->name('horarios.index');
+    Route::post('/{profissional}/horarios',[HorarioProfissionalController::class, 'store'])->name('horarios.store');
+    Route::delete('/{profissional}/horarios/{horario}',[HorarioProfissionalController::class, 'destroy'])->name('horarios.destroy');
 });
