@@ -28,4 +28,10 @@ class Estabelecimento extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /** @return HasMany<Profissional, $this> */
+    public function profissionais(): HasMany
+    {
+        return $this->hasMany(Profissional::class);
+    }
 }
