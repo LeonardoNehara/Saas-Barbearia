@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfissionalController;
 use App\Http\Controllers\ServicoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HorarioProfissionalController;
+use App\Http\Controllers\BloqueioProfissionalController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,4 +29,8 @@ Route::middleware(['auth', 'active'])->prefix('profissionais')->name('profission
     Route::get('/{profissional}/horarios', [HorarioProfissionalController::class, 'index'])->name('horarios.index')->middleware('can:is-admin');
     Route::post('/{profissional}/horarios', [HorarioProfissionalController::class, 'store'])->name('horarios.store')->middleware('can:is-admin');
     Route::delete('/{profissional}/horarios/{horario}', [HorarioProfissionalController::class, 'destroy'])->name('horarios.destroy')->middleware('can:is-admin');
+
+    Route::get('/{profissional}/bloqueios',[BloqueioProfissionalController::class, 'index'])->name('bloqueios.index')->middleware('can:is-admin');
+    Route::post('/{profissional}/bloqueios',[BloqueioProfissionalController::class, 'store'])->name('bloqueios.store')->middleware('can:is-admin');
+    Route::delete('/{profissional}/bloqueios/{bloqueio}',[BloqueioProfissionalController::class, 'destroy'])->name('bloqueios.destroy')->middleware('can:is-admin');
 });
