@@ -7,7 +7,7 @@
             <div class="flex items-center gap-3"><h1 class="text-3xl font-bold tracking-tight">Usuários</h1><span class="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand-dark">{{ $usuarios->total() }} {{ $usuarios->total() === 1 ? 'registro' : 'registros' }}</span></div>
             <p class="mt-2 text-sm text-muted">Gerencie os usuários e acessos da sua barbearia.</p>
         </div>
-        <a href="{{ route('usuarios.create') }}" class="admin-button"><x-icon name="plus" class="size-4" />Novo usuário</a>
+        <button type="button" class="admin-button" onclick="document.getElementById('modal-novo-usuario').showModal()" ><x-icon name="plus" class="size-4" />Novo usuário</button>
     </div>
 
     <form method="GET" action="{{ route('usuarios.index') }}" data-busy-form class="mb-5 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4">
@@ -53,4 +53,14 @@
         <x-table-pagination :paginator="$usuarios" />
     </section>
     <p class="mt-3 text-xs text-muted sm:hidden">Deslize a tabela para ver todas as colunas e ações.</p>
+    @include('usuarios.partials.create-modal')
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document
+                    .getElementById('modal-novo-usuario')
+                    ?.showModal();
+            });
+        </script>
+    @endif
 @endsection
