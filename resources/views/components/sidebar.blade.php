@@ -5,7 +5,7 @@
         <a href="{{ route('usuarios.index') }}" @class(['admin-nav', 'admin-nav-active' => request()->routeIs('usuarios.*')]) @if(request()->routeIs('usuarios.*')) aria-current="page" @endif><x-icon name="users" class="size-5" />Usuários</a>
     @endcan
     @can('viewAny', \App\Models\Servico::class)
-        <a href="{{ route('servicos.index') }}" @class(['admin-nav', 'admin-nav-active' => request()->routeIs('servicos.*')])><x-icon name="briefcase" class="size-5" />Serviços</a>
+        <a href="{{ route('servicos.index') }}" @class(['admin-nav', 'admin-nav-active' => request()->routeIs('servicos.*')]) @if(request()->routeIs('servicos.*')) aria-current="page" @endif><x-icon name="scissors" class="size-5" />Serviços</a>
     @endcan
     @can('viewAny', \App\Models\Profissional::class)
         <a href="{{ route('profissionais.index') }}" @class(['admin-nav', 'admin-nav-active' => request()->routeIs('profissionais.*')])><x-icon name="scissors" class="size-5" />Profissionais</a>

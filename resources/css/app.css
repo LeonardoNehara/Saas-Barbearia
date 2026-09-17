@@ -14,7 +14,7 @@
 }
 
 @layer components {
-    .admin-shell :is(a, button, input, select):focus-visible {
+    .admin-shell :is(a, button, input, select, textarea):focus-visible {
         outline: 2px solid var(--color-brand-dark);
         outline-offset: 3px;
     }
