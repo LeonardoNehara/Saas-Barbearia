@@ -1,56 +1,237 @@
 <?php
 
+use App\Http\Controllers\AgendamentoController;
+use App\Http\Controllers\AgendamentoPublicoController;
+use App\Http\Controllers\BloqueioProfissionalController;
+use App\Http\Controllers\DisponibilidadeController;
+use App\Http\Controllers\EstabelecimentoPublicoController;
+use App\Http\Controllers\HorarioProfissionalController;
 use App\Http\Controllers\ProfissionalController;
 use App\Http\Controllers\ServicoController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HorarioProfissionalController;
-use App\Http\Controllers\BloqueioProfissionalController;
-use App\Http\Controllers\AgendamentoController;
-use App\Http\Controllers\DisponibilidadeController;
-use App\Http\Controllers\AgendamentoPublicoController;
+
+/*
+|--------------------------------------------------------------------------
+| Página inicial
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get(
-    '/publico/{estabelecimento}/disponibilidade',
-    [DisponibilidadeController::class, 'index']
-)->name('publico.disponibilidade');
 
-Route::post(
-    '/publico/{estabelecimento}/agendamentos',
-    [AgendamentoPublicoController::class, 'store']
-)->name('publico.agendamentos.store');
+/*
+|--------------------------------------------------------------------------
+| Rotas públicas
+|--------------------------------------------------------------------------
+|
+| Utilizadas pelo cliente final para consultar a barbearia,
+| serviços, profissionais, disponibilidade e realizar agendamentos.
+|
+*/
 
-Route::middleware(['auth', 'active'])->prefix('servicos')->name('servicos.')->group(function (): void {
-    Route::get('/', [ServicoController::class, 'index'])->name('index');
-    Route::post('/', [ServicoController::class, 'store'])->name('store');
-    Route::get('/{servico}', [ServicoController::class, 'show'])->name('show');
-    Route::put('/{servico}', [ServicoController::class, 'update'])->name('update');
-    Route::patch('/{servico}/status', [ServicoController::class, 'toggleStatus'])->name('status');
-    Route::put('/{servico}/profissionais', [ServicoController::class, 'syncProfissionais'])->name('profissionais');
-});
+Route::prefix('publico/{estabelecimento}')
+    ->name('publico.')
+    ->group(function (): void {
 
-Route::middleware(['auth', 'active'])->prefix('profissionais')->name('profissionais.')->group(function (): void {
-    Route::get('/', [ProfissionalController::class, 'index'])->name('index');
-    Route::post('/', [ProfissionalController::class, 'store'])->name('store');
-    Route::get('/{profissional}', [ProfissionalController::class, 'show'])->name('show');
-    Route::put('/{profissional}', [ProfissionalController::class, 'update'])->name('update');
-    Route::patch('/{profissional}/status', [ProfissionalController::class, 'toggleStatus'])->name('status');
+        // Estabelecimento
+        Route::get(
+            '/',
+            [EstabelecimentoPublicoController::class, 'show']
+        )->name('estabelecimento.show');
 
-    Route::get('/{profissional}/horarios', [HorarioProfissionalController::class, 'index'])->name('horarios.index')->middleware('can:is-admin');
-    Route::post('/{profissional}/horarios', [HorarioProfissionalController::class, 'store'])->name('horarios.store')->middleware('can:is-admin');
-    Route::delete('/{profissional}/horarios/{horario}', [HorarioProfissionalController::class, 'destroy'])->name('horarios.destroy')->middleware('can:is-admin');
+        // Serviços
+        Route::get(
+            '/servicos',
+            [EstabelecimentoPublicoController::class, 'servicos']
+        )->name('servicos.index');
 
-    Route::get('/{profissional}/bloqueios',[BloqueioProfissionalController::class, 'index'])->name('bloqueios.index')->middleware('can:is-admin');
-    Route::post('/{profissional}/bloqueios',[BloqueioProfissionalController::class, 'store'])->name('bloqueios.store')->middleware('can:is-admin');
-    Route::delete('/{profissional}/bloqueios/{bloqueio}',[BloqueioProfissionalController::class, 'destroy'])->name('bloqueios.destroy')->middleware('can:is-admin');
-});
+        // Profissionais que realizam determinado serviço
+        Route::get(
+            '/servicos/{servico}/profissionais',
+            [EstabelecimentoPublicoController::class, 'profissionais']
+        )->name('servicos.profissionais');
 
-Route::middleware(['auth', 'active'])->prefix('agendamentos')->name('agendamentos.')->group(function (): void {
-    Route::get('/', [AgendamentoController::class, 'index'])->name('index');
-    Route::post('/', [AgendamentoController::class, 'store'])->name('store');
-    Route::get('/{agendamento}', [AgendamentoController::class, 'show'])->name('show');
-    Route::patch('/{agendamento}/cancelar', [AgendamentoController::class, 'cancelar'])->name('cancelar');
-});
+        // Disponibilidade
+        Route::get(
+            '/disponibilidade',
+            [DisponibilidadeController::class, 'index']
+        )->name('disponibilidade');
+
+        // Agendamento
+        Route::post(
+            '/agendamentos',
+            [AgendamentoPublicoController::class, 'store']
+        )->name('agendamentos.store');
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Serviços
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'active'])
+    ->prefix('servicos')
+    ->name('servicos.')
+    ->group(function (): void {
+
+        Route::get(
+            '/',
+            [ServicoController::class, 'index']
+        )->name('index');
+
+        Route::post(
+            '/',
+            [ServicoController::class, 'store']
+        )->name('store');
+
+        Route::get(
+            '/{servico}',
+            [ServicoController::class, 'show']
+        )->name('show');
+
+        Route::put(
+            '/{servico}',
+            [ServicoController::class, 'update']
+        )->name('update');
+
+        Route::patch(
+            '/{servico}/status',
+            [ServicoController::class, 'toggleStatus']
+        )->name('status');
+
+        Route::put(
+            '/{servico}/profissionais',
+            [ServicoController::class, 'syncProfissionais']
+        )->name('profissionais');
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Profissionais
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'active'])
+    ->prefix('profissionais')
+    ->name('profissionais.')
+    ->group(function (): void {
+
+        Route::get(
+            '/',
+            [ProfissionalController::class, 'index']
+        )->name('index');
+
+        Route::post(
+            '/',
+            [ProfissionalController::class, 'store']
+        )->name('store');
+
+        Route::get(
+            '/{profissional}',
+            [ProfissionalController::class, 'show']
+        )->name('show');
+
+        Route::put(
+            '/{profissional}',
+            [ProfissionalController::class, 'update']
+        )->name('update');
+
+        Route::patch(
+            '/{profissional}/status',
+            [ProfissionalController::class, 'toggleStatus']
+        )->name('status');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Horários do profissional
+        |--------------------------------------------------------------------------
+        */
+
+        Route::middleware('can:is-admin')
+            ->prefix('{profissional}/horarios')
+            ->name('horarios.')
+            ->group(function (): void {
+
+                Route::get(
+                    '/',
+                    [HorarioProfissionalController::class, 'index']
+                )->name('index');
+
+                Route::post(
+                    '/',
+                    [HorarioProfissionalController::class, 'store']
+                )->name('store');
+
+                Route::delete(
+                    '/{horario}',
+                    [HorarioProfissionalController::class, 'destroy']
+                )->name('destroy');
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bloqueios do profissional
+        |--------------------------------------------------------------------------
+        */
+
+        Route::middleware('can:is-admin')
+            ->prefix('{profissional}/bloqueios')
+            ->name('bloqueios.')
+            ->group(function (): void {
+
+                Route::get(
+                    '/',
+                    [BloqueioProfissionalController::class, 'index']
+                )->name('index');
+
+                Route::post(
+                    '/',
+                    [BloqueioProfissionalController::class, 'store']
+                )->name('store');
+
+                Route::delete(
+                    '/{bloqueio}',
+                    [BloqueioProfissionalController::class, 'destroy']
+                )->name('destroy');
+            });
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Agendamentos
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'active'])
+    ->prefix('agendamentos')
+    ->name('agendamentos.')
+    ->group(function (): void {
+
+        Route::get(
+            '/',
+            [AgendamentoController::class, 'index']
+        )->name('index');
+
+        Route::post(
+            '/',
+            [AgendamentoController::class, 'store']
+        )->name('store');
+
+        Route::get(
+            '/{agendamento}',
+            [AgendamentoController::class, 'show']
+        )->name('show');
+
+        Route::patch(
+            '/{agendamento}/cancelar',
+            [AgendamentoController::class, 'cancelar']
+        )->name('cancelar');
+    });
