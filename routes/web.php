@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AgendamentoController;
 use App\Http\Controllers\AgendamentoPublicoController;
+use App\Http\Controllers\AuthenticatedSessionController;
 use App\Http\Controllers\BloqueioProfissionalController;
 use App\Http\Controllers\DisponibilidadeController;
 use App\Http\Controllers\EstabelecimentoPublicoController;
@@ -17,9 +18,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return auth()->check()
+        ? redirect()->route('agendamentos.index')
+        : view('auth.login');
 });
 
+Route::middleware('guest')->group(function (): void {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -66,7 +73,6 @@ Route::prefix('publico/{estabelecimento}')
         )->name('agendamentos.store');
     });
 
-
 /*
 |--------------------------------------------------------------------------
 | Serviços
@@ -109,7 +115,6 @@ Route::middleware(['auth', 'active'])
         )->name('profissionais');
     });
 
-
 /*
 |--------------------------------------------------------------------------
 | Profissionais
@@ -146,7 +151,6 @@ Route::middleware(['auth', 'active'])
             [ProfissionalController::class, 'toggleStatus']
         )->name('status');
 
-
         /*
         |--------------------------------------------------------------------------
         | Horários do profissional
@@ -173,7 +177,6 @@ Route::middleware(['auth', 'active'])
                     [HorarioProfissionalController::class, 'destroy']
                 )->name('destroy');
             });
-
 
         /*
         |--------------------------------------------------------------------------
@@ -202,7 +205,6 @@ Route::middleware(['auth', 'active'])
                 )->name('destroy');
             });
     });
-
 
 /*
 |--------------------------------------------------------------------------
