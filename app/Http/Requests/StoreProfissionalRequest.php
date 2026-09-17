@@ -8,6 +8,20 @@ use Illuminate\Validation\Rule;
 
 class StoreProfissionalRequest extends FormRequest
 {
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'nome.required' => 'Informe o nome do profissional.',
+            'string' => 'O campo :attribute deve ser um texto.',
+            'max' => 'O campo :attribute deve ter no máximo :max caracteres.',
+            'email.email' => 'Informe um email válido.',
+            'user_id.integer' => 'Selecione um usuário válido.',
+            'user_id.exists' => 'Selecione um usuário do seu estabelecimento.',
+            'user_id.unique' => 'Este usuário já está vinculado a outro profissional.',
+        ];
+    }
+
     public function authorize(): bool
     {
         return $this->user()->can('create', Profissional::class);

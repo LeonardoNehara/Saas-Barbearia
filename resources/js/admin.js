@@ -1,3 +1,13 @@
+document.addEventListener('error', (event) => {
+    if (event.target instanceof HTMLImageElement && event.target.matches('[data-profissional-foto]')) {
+        event.target.hidden = true;
+    }
+}, true);
+
+document.querySelectorAll('[data-profissional-foto]').forEach((photo) => {
+    if (photo.complete && !photo.naturalWidth) photo.hidden = true;
+});
+
 const menu = document.querySelector('#mobile-menu');
 const openMenu = document.querySelector('[data-open-menu]');
 

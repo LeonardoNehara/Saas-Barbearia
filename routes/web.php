@@ -142,6 +142,9 @@ Route::middleware(['auth', 'active'])
     ->name('profissionais.')
     ->group(function (): void {
 
+        Route::get('/novo', [ProfissionalController::class, 'create'])->name('create');
+        Route::get('/{profissional}/editar', [ProfissionalController::class, 'edit'])->name('edit');
+
         Route::get(
             '/',
             [ProfissionalController::class, 'index']
