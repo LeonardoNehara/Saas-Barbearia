@@ -45,4 +45,9 @@ class Estabelecimento extends Model
     {
         return $this->hasMany(Agendamento::class);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }
