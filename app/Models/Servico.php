@@ -32,4 +32,9 @@ class Servico extends Model
     {
         return $this->belongsToMany(Profissional::class, 'profissional_servico')->withTimestamps();
     }
+
+    public function agendamentos(): HasMany
+    {
+        return $this->hasMany(Agendamento::class);
+    }
 }
