@@ -6,11 +6,13 @@ use App\Http\Requests\StoreHorarioProfissionalRequest;
 use App\Models\HorarioProfissional;
 use App\Models\Profissional;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class HorarioProfissionalController extends Controller
 {
-    public function index(Request $request, Profissional $profissional): JsonResponse
+    public function index(Request $request, Profissional $profissional): JsonResponse|View
     {
         $this->garantirMesmoEstabelecimento($request, $profissional);
 
@@ -19,13 +21,19 @@ class HorarioProfissionalController extends Controller
             ->orderBy('hora_inicio')
             ->get();
 
-        return response()->json($horarios);
+        if ($request->expectsJson()) {
+            return response()->json($horarios);
+        }
+
+        $bloqueios = $profissional->bloqueios()->orderBy('inicio')->get();
+
+        return view('profissionais.disponibilidade', compact('profissional', 'horarios', 'bloqueios'));
     }
 
     public function store(
         StoreHorarioProfissionalRequest $request,
         Profissional $profissional
-    ): JsonResponse {
+    ): JsonResponse|RedirectResponse {
         $this->garantirMesmoEstabelecimento($request, $profissional);
 
         $dados = $request->validated();
@@ -37,6 +45,10 @@ class HorarioProfissionalController extends Controller
             ->exists();
 
         if ($existeSobreposicao) {
+            if (! $request->expectsJson()) {
+                return redirect()->route('profissionais.horarios.index', $profissional)->withErrors(['hora_inicio' => 'O horário informado conflita com outro horário do profissional.'])->withInput();
+            }
+
             return response()->json([
                 'message' => 'O horário informado conflita com outro horário do profissional.',
             ], 422);
@@ -44,14 +56,16 @@ class HorarioProfissionalController extends Controller
 
         $horario = $profissional->horarios()->create($dados);
 
-        return response()->json($horario, 201);
+        return $request->expectsJson()
+            ? response()->json($horario, 201)
+            : redirect()->route('profissionais.horarios.index', $profissional)->with('status', 'Horário adicionado.');
     }
 
     public function destroy(
         Request $request,
         Profissional $profissional,
         HorarioProfissional $horario
-    ): JsonResponse {
+    ): JsonResponse|RedirectResponse {
         $this->garantirMesmoEstabelecimento($request, $profissional);
 
         if ($horario->profissional_id !== $profissional->id) {
@@ -60,7 +74,9 @@ class HorarioProfissionalController extends Controller
 
         $horario->delete();
 
-        return response()->json(null, 204);
+        return $request->expectsJson()
+            ? response()->json(null, 204)
+            : redirect()->route('profissionais.horarios.index', $profissional)->with('status', 'Horário removido.');
     }
 
     private function garantirMesmoEstabelecimento(

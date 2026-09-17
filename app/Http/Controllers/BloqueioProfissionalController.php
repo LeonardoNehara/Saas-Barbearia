@@ -6,6 +6,7 @@ use App\Http\Requests\StoreBloqueioProfissionalRequest;
 use App\Models\BloqueioProfissional;
 use App\Models\Profissional;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class BloqueioProfissionalController extends Controller
@@ -13,8 +14,12 @@ class BloqueioProfissionalController extends Controller
     public function index(
         Request $request,
         Profissional $profissional
-    ): JsonResponse {
+    ): JsonResponse|RedirectResponse {
         $this->garantirMesmoEstabelecimento($request, $profissional);
+
+        if (! $request->expectsJson()) {
+            return redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios');
+        }
 
         $bloqueios = $profissional->bloqueios()
             ->orderBy('inicio')
@@ -26,7 +31,7 @@ class BloqueioProfissionalController extends Controller
     public function store(
         StoreBloqueioProfissionalRequest $request,
         Profissional $profissional
-    ): JsonResponse {
+    ): JsonResponse|RedirectResponse {
         $this->garantirMesmoEstabelecimento($request, $profissional);
 
         $dados = $request->validated();
@@ -37,6 +42,10 @@ class BloqueioProfissionalController extends Controller
             ->exists();
 
         if ($existeSobreposicao) {
+            if (! $request->expectsJson()) {
+                return redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->withErrors(['inicio' => 'O período informado conflita com outro bloqueio do profissional.'])->withInput();
+            }
+
             return response()->json([
                 'message' => 'O período informado conflita com outro bloqueio do profissional.',
             ], 422);
@@ -44,14 +53,16 @@ class BloqueioProfissionalController extends Controller
 
         $bloqueio = $profissional->bloqueios()->create($dados);
 
-        return response()->json($bloqueio, 201);
+        return $request->expectsJson()
+            ? response()->json($bloqueio, 201)
+            : redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->with('status', 'Bloqueio adicionado.');
     }
 
     public function destroy(
         Request $request,
         Profissional $profissional,
         BloqueioProfissional $bloqueio
-    ): JsonResponse {
+    ): JsonResponse|RedirectResponse {
         $this->garantirMesmoEstabelecimento($request, $profissional);
 
         if ($bloqueio->profissional_id !== $profissional->id) {
@@ -60,7 +71,9 @@ class BloqueioProfissionalController extends Controller
 
         $bloqueio->delete();
 
-        return response()->json(null, 204);
+        return $request->expectsJson()
+            ? response()->json(null, 204)
+            : redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->with('status', 'Bloqueio removido.');
     }
 
     private function garantirMesmoEstabelecimento(
