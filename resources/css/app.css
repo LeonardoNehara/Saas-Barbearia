@@ -4,6 +4,21 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
+    --color-brand: #b88c50;
+    --color-brand-button: #966c36;
+    --color-brand-dark: #87602e;
+    --color-ink: #191919;
+    --color-muted: #626b78;
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@layer components {
+    .login-input {
+        @apply min-h-12 w-full rounded-xl border border-gray-200 bg-gray-100/90 py-3 pr-4 pl-11 text-sm text-ink outline-none transition placeholder:text-gray-500 focus:border-brand-dark focus:ring-2 focus:ring-brand/25;
+    }
+
+    .login-story {
+        background: linear-gradient(180deg, rgb(9 11 10 / 83%), rgb(9 11 10 / 88%)), url('/images/barbershop.jpg') center / cover, #111211;
+    }
 }
