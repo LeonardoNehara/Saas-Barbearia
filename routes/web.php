@@ -236,6 +236,8 @@ Route::middleware(['auth', 'active'])
     ->name('agendamentos.')
     ->group(function (): void {
 
+        Route::get('/disponibilidade', [AgendamentoController::class, 'disponibilidade'])->name('disponibilidade');
+
         Route::get(
             '/',
             [AgendamentoController::class, 'index']
