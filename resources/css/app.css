@@ -14,6 +14,30 @@
 }
 
 @layer components {
+    .admin-shell :is(a, button, input, select):focus-visible {
+        outline: 2px solid var(--color-brand-dark);
+        outline-offset: 3px;
+    }
+
+    .admin-nav {
+        @apply flex min-h-11 items-center gap-3 rounded-lg border-l-2 border-transparent px-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white;
+    }
+
+    .admin-nav-active {
+        @apply border-brand bg-white/10 font-medium text-white;
+    }
+
+    .admin-input {
+        @apply min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400;
+    }
+
+    .admin-button {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-button px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 transition hover:bg-brand-dark disabled:cursor-wait disabled:opacity-60;
+    }
+
+    .admin-secondary {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-muted transition hover:bg-slate-50;
+    }
     .login-input {
         @apply min-h-12 w-full rounded-xl border border-gray-200 bg-gray-100/90 py-3 pr-4 pl-11 text-sm text-ink outline-none transition placeholder:text-gray-500 focus:border-brand-dark focus:ring-2 focus:ring-brand/25;
     }

@@ -1,3 +1,5 @@
+import './admin';
+
 const loginForm = document.querySelector('[data-login-form]');
 
 if (loginForm) {
