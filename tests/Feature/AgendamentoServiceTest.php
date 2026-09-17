@@ -293,4 +293,48 @@ class AgendamentoServiceTest extends TestCase
             ])
         );
     }
+
+    public function test_nao_permite_agendamento_durante_intervalo_entre_jornadas(): void
+    {
+        // Remove a jornada contínua criada no setUp.
+        $this->profissional->horarios()->delete();
+
+        HorarioProfissional::create([
+            'profissional_id' => $this->profissional->id,
+            'dia_semana' => 1,
+            'hora_inicio' => '08:00:00',
+            'hora_fim' => '12:00:00',
+        ]);
+
+        HorarioProfissional::create([
+            'profissional_id' => $this->profissional->id,
+            'dia_semana' => 1,
+            'hora_inicio' => '13:30:00',
+            'hora_fim' => '18:00:00',
+        ]);
+
+        $this->expectException(ValidationException::class);
+
+        $this->service->criar(
+            $this->estabelecimento,
+            $this->dados([
+                'inicio' => '2026-09-21 11:45:00',
+            ])
+        );
+    }
+
+    public function test_agendamento_pode_terminar_exatamente_no_final_da_jornada(): void
+    {
+        $agendamento = $this->service->criar(
+            $this->estabelecimento,
+            $this->dados([
+                'inicio' => '2026-09-21 17:30:00',
+            ])
+        );
+
+        $this->assertSame(
+            '2026-09-21 18:00:00',
+            $agendamento->fim->format('Y-m-d H:i:s')
+        );
+    }
 }

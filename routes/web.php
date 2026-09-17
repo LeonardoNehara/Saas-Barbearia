@@ -5,6 +5,7 @@ use App\Http\Controllers\ServicoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HorarioProfissionalController;
 use App\Http\Controllers\BloqueioProfissionalController;
+use App\Http\Controllers\AgendamentoController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,4 +34,11 @@ Route::middleware(['auth', 'active'])->prefix('profissionais')->name('profission
     Route::get('/{profissional}/bloqueios',[BloqueioProfissionalController::class, 'index'])->name('bloqueios.index')->middleware('can:is-admin');
     Route::post('/{profissional}/bloqueios',[BloqueioProfissionalController::class, 'store'])->name('bloqueios.store')->middleware('can:is-admin');
     Route::delete('/{profissional}/bloqueios/{bloqueio}',[BloqueioProfissionalController::class, 'destroy'])->name('bloqueios.destroy')->middleware('can:is-admin');
+});
+
+Route::middleware(['auth', 'active'])->prefix('agendamentos')->name('agendamentos.')->group(function (): void {
+    Route::get('/', [AgendamentoController::class, 'index'])->name('index');
+    Route::post('/', [AgendamentoController::class, 'store'])->name('store');
+    Route::get('/{agendamento}', [AgendamentoController::class, 'show'])->name('show');
+    Route::patch('/{agendamento}/cancelar', [AgendamentoController::class, 'cancelar'])->name('cancelar');
 });
