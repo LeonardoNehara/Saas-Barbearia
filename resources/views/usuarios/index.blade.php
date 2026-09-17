@@ -19,7 +19,7 @@
         <div class="min-w-32 flex-1 sm:flex-none"><label for="active" class="sr-only">Situação</label><select id="active" name="active" class="admin-input"><option value="">Todas as situações</option><option value="1" @selected(($filters['active'] ?? '') === '1')>Ativo</option><option value="0" @selected(($filters['active'] ?? '') === '0')>Inativo</option></select></div>
         <button type="submit" class="admin-secondary" data-busy-label>Filtrar</button>
         @if (filled($filters['search'] ?? null) || filled($filters['role'] ?? null) || isset($filters['active']))<a href="{{ route('usuarios.index') }}" class="rounded-lg px-2 py-3 text-xs text-muted underline underline-offset-4">Limpar</a>@endif
-        <div class="ml-auto flex items-center gap-3"><label for="per_page" class="text-xs text-muted">Exibir</label><select id="per_page" name="per_page" class="admin-input w-20">@foreach ([10, 15, 25, 50] as $amount)<option value="{{ $amount }}" @selected((int) ($filters['per_page'] ?? 10) === $amount)>{{ $amount }}</option>@endforeach</select></div>
+        <x-per-page :value="$filters['per_page'] ?? 10" />
     </form>
 
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white" aria-label="Lista de usuários">
@@ -50,14 +50,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 px-5 py-4 text-xs text-muted">
-            <p>{{ $usuarios->firstItem() ?? 0 }}–{{ $usuarios->lastItem() ?? 0 }} de {{ $usuarios->total() }} registros</p>
-            <nav aria-label="Paginação" class="flex items-center gap-4">
-                @if ($usuarios->onFirstPage())<span aria-disabled="true" class="text-slate-400">Anterior</span>@else<a href="{{ $usuarios->previousPageUrl() }}" rel="prev" class="rounded px-2 py-2 hover:text-brand-dark">Anterior</a>@endif
-                <span class="sr-only">Página {{ $usuarios->currentPage() }} de {{ $usuarios->lastPage() }}</span>
-                @if ($usuarios->hasMorePages())<a href="{{ $usuarios->nextPageUrl() }}" rel="next" class="rounded px-2 py-2 font-medium text-brand-dark">Próximo</a>@else<span aria-disabled="true" class="text-slate-400">Próximo</span>@endif
-            </nav>
-        </div>
+        <x-table-pagination :paginator="$usuarios" />
     </section>
     <p class="mt-3 text-xs text-muted sm:hidden">Deslize a tabela para ver todas as colunas e ações.</p>
 @endsection

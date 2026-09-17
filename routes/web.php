@@ -97,6 +97,9 @@ Route::middleware(['auth', 'active'])
     ->name('servicos.')
     ->group(function (): void {
 
+        Route::get('/novo', [ServicoController::class, 'create'])->name('create');
+        Route::get('/{servico}/editar', [ServicoController::class, 'edit'])->name('edit');
+
         Route::get(
             '/',
             [ServicoController::class, 'index']
