@@ -6,10 +6,22 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HorarioProfissionalController;
 use App\Http\Controllers\BloqueioProfissionalController;
 use App\Http\Controllers\AgendamentoController;
+use App\Http\Controllers\DisponibilidadeController;
+use App\Http\Controllers\AgendamentoPublicoController;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get(
+    '/publico/{estabelecimento}/disponibilidade',
+    [DisponibilidadeController::class, 'index']
+)->name('publico.disponibilidade');
+
+Route::post(
+    '/publico/{estabelecimento}/agendamentos',
+    [AgendamentoPublicoController::class, 'store']
+)->name('publico.agendamentos.store');
 
 Route::middleware(['auth', 'active'])->prefix('servicos')->name('servicos.')->group(function (): void {
     Route::get('/', [ServicoController::class, 'index'])->name('index');

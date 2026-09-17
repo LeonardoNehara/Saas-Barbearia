@@ -12,6 +12,7 @@ use App\Services\AgendamentoService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
+use Carbon\Carbon;
 
 class AgendamentoServiceTest extends TestCase
 {
@@ -54,6 +55,13 @@ class AgendamentoServiceTest extends TestCase
         ]);
 
         $this->service = app(AgendamentoService::class);
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
     }
 
     private function dados(array $alteracoes = []): array
@@ -335,6 +343,31 @@ class AgendamentoServiceTest extends TestCase
         $this->assertSame(
             '2026-09-21 18:00:00',
             $agendamento->fim->format('Y-m-d H:i:s')
+        );
+    }
+
+    public function test_nao_permite_agendamento_no_passado(): void
+    {
+        Carbon::setTestNow(
+            Carbon::parse(
+                '2026-09-21 14:00:00',
+                'America/Sao_Paulo'
+            )
+        );
+
+        $this->expectException(
+            ValidationException::class
+        );
+
+        $this->service->criar(
+            $this->estabelecimento,
+            [
+                'profissional_id' => $this->profissional->id,
+                'servico_id' => $this->servico->id,
+                'cliente_nome' => 'Leonardo',
+                'cliente_telefone' => '44999999999',
+                'inicio' => '2026-09-21 13:30:00',
+            ]
         );
     }
 }
