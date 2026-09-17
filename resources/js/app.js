@@ -1,5 +1,11 @@
 import './admin';
 
+if (document.querySelector('[data-agenda]')) {
+    import('./agenda').catch(() => {
+        document.querySelector('[data-agenda-message]').textContent = 'Não foi possível iniciar a agenda. Atualize a página para tentar novamente.';
+    });
+}
+
 const loginForm = document.querySelector('[data-login-form]');
 
 if (loginForm) {

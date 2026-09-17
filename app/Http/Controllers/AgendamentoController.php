@@ -2,17 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DisponibilidadeRequest;
+use App\Http\Requests\IndexAgendamentoRequest;
 use App\Http\Requests\StoreAgendamentoRequest;
 use App\Models\Agendamento;
+use App\Models\BloqueioProfissional;
+use App\Models\Profissional;
+use App\Models\Servico;
 use App\Services\AgendamentoService;
+use App\Services\DisponibilidadeService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class AgendamentoController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(IndexAgendamentoRequest $request): JsonResponse|View
     {
-        $agendamentos = Agendamento::query()
+        if (! $request->expectsJson()) {
+            $estabelecimento = $request->user()->estabelecimento;
+            $profissionais = Profissional::where('estabelecimento_id', $estabelecimento->id)
+                ->with('horarios')->orderBy('nome')->get();
+            $servicos = Servico::where('estabelecimento_id', $estabelecimento->id)->where('active', true)
+                ->with(['profissionais' => fn ($query) => $query->where('profissionais.estabelecimento_id', $estabelecimento->id)->where('profissionais.active', true)])
+                ->orderBy('nome')->get();
+            $agendaConfig = [
+                'feedUrl' => route('agendamentos.index'),
+                'storeUrl' => route('agendamentos.store'),
+                'availabilityUrl' => route('agendamentos.disponibilidade'),
+                'timezone' => $estabelecimento->timezone,
+                'now' => CarbonImmutable::now($estabelecimento->timezone)->format('Y-m-d\TH:i:s'),
+                'services' => $servicos->map(fn (Servico $servico): array => [
+                    'id' => $servico->id, 'name' => $servico->nome,
+                    'professionals' => $servico->profissionais->map(fn (Profissional $profissional): array => ['id' => $profissional->id, 'name' => $profissional->nome])->values(),
+                ])->values(),
+                'professionals' => $profissionais->map(fn (Profissional $profissional): array => [
+                    'id' => $profissional->id,
+                    'hours' => $profissional->horarios->map(fn ($horario): array => [
+                        'daysOfWeek' => [(int) $horario->dia_semana],
+                        'startTime' => $horario->hora_inicio, 'endTime' => $horario->hora_fim,
+                    ])->values(),
+                ])->values(),
+            ];
+
+            return view('agendamentos.index', compact('agendaConfig', 'profissionais', 'servicos'));
+        }
+
+        $query = Agendamento::query()
             ->where(
                 'estabelecimento_id',
                 $request->user()->estabelecimento_id
@@ -21,10 +59,70 @@ class AgendamentoController extends Controller
                 'profissional',
                 'servico',
             ])
-            ->orderBy('inicio')
-            ->paginate(20);
+            ->when($request->validated('profissional_id'), fn ($query, $id) => $query->where('profissional_id', $id))
+            ->orderBy('inicio');
+
+        if ($request->filled('start')) {
+            $start = CarbonImmutable::parse($request->validated('start'));
+            $end = CarbonImmutable::parse($request->validated('end'));
+
+            if ($start->diffInDays($end) > 62) {
+                throw ValidationException::withMessages(['end' => 'Consulte um período de até 62 dias.']);
+            }
+
+            $events = $query->where('inicio', '<', $end->format('Y-m-d H:i:s'))
+                ->where('fim', '>', $start->format('Y-m-d H:i:s'))->get()
+                ->map(fn (Agendamento $agendamento): array => $this->calendarEvent($agendamento));
+
+            if ($request->filled('profissional_id')) {
+                $blocks = BloqueioProfissional::where('profissional_id', $request->validated('profissional_id'))
+                    ->whereHas('profissional', fn ($query) => $query->where('estabelecimento_id', $request->user()->estabelecimento_id))
+                    ->where('inicio', '<', $end->format('Y-m-d H:i:s'))->where('fim', '>', $start->format('Y-m-d H:i:s'))->get();
+                foreach ($blocks as $block) {
+                    $events->push([
+                        'id' => 'bloqueio-'.$block->id, 'title' => 'Indisponível',
+                        'start' => $block->inicio->format('Y-m-d\TH:i:s'), 'end' => $block->fim->format('Y-m-d\TH:i:s'),
+                        'display' => 'background', 'backgroundColor' => '#f5c7c7',
+                    ]);
+                }
+            }
+
+            return response()->json($events->values());
+        }
+
+        $agendamentos = $query->paginate(20);
 
         return response()->json($agendamentos);
+    }
+
+    public function disponibilidade(DisponibilidadeRequest $request, DisponibilidadeService $service): JsonResponse
+    {
+        abort_if($request->user()->estabelecimento === null, 403);
+        $dados = $request->validated();
+
+        return response()->json(['data' => $service->buscar(
+            $request->user()->estabelecimento, $dados['profissional_id'], $dados['servico_id'], $dados['data'],
+        )]);
+    }
+
+    /** @return array<string, mixed> */
+    private function calendarEvent(Agendamento $agendamento): array
+    {
+        return [
+            'id' => (string) $agendamento->id,
+            'title' => $agendamento->cliente_nome.' · '.$agendamento->servico?->nome,
+            'start' => $agendamento->inicio->format('Y-m-d\TH:i:s'),
+            'end' => $agendamento->fim->format('Y-m-d\TH:i:s'),
+            'classNames' => [$agendamento->status === 'cancelado' ? 'agenda-cancelado' : 'agenda-agendado'],
+            'extendedProps' => [
+                'detailsUrl' => route('agendamentos.show', $agendamento),
+                'cancelUrl' => route('agendamentos.cancelar', $agendamento),
+                'cliente' => $agendamento->cliente_nome, 'telefone' => $agendamento->cliente_telefone,
+                'servico' => $agendamento->servico?->nome, 'profissional' => $agendamento->profissional?->nome,
+                'status' => $agendamento->status, 'observacoes' => $agendamento->observacoes,
+                'periodo' => $agendamento->inicio->format('d/m/Y H:i').' – '.$agendamento->fim->format('d/m/Y H:i'),
+            ],
+        ];
     }
 
     public function show(
@@ -41,7 +139,7 @@ class AgendamentoController extends Controller
             'servico',
         ]);
 
-        return response()->json($agendamento);
+        return response()->json($request->boolean('calendar') ? $this->calendarEvent($agendamento) : $agendamento);
     }
 
     public function store(

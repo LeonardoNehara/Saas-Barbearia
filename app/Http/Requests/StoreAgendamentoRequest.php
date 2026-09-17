@@ -25,4 +25,27 @@ class StoreAgendamentoRequest extends FormRequest
             'observacoes' => ['nullable', 'string', 'max:2000'],
         ];
     }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'required' => 'Informe :attribute.',
+            'integer' => 'Selecione um valor válido para :attribute.',
+            'exists' => 'O valor selecionado para :attribute não está disponível.',
+            'string' => 'Informe um texto válido para :attribute.',
+            'max' => 'O campo :attribute deve ter no máximo :max caracteres.',
+            'date' => 'Selecione uma data e um horário válidos.',
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function attributes(): array
+    {
+        return [
+            'profissional_id' => 'profissional', 'servico_id' => 'serviço',
+            'cliente_nome' => 'nome do cliente', 'cliente_telefone' => 'telefone',
+            'inicio' => 'horário', 'observacoes' => 'observações',
+        ];
+    }
 }
