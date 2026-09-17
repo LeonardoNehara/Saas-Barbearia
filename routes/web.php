@@ -7,8 +7,10 @@ use App\Http\Controllers\BloqueioProfissionalController;
 use App\Http\Controllers\DisponibilidadeController;
 use App\Http\Controllers\EstabelecimentoPublicoController;
 use App\Http\Controllers\HorarioProfissionalController;
+use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\ProfissionalController;
 use App\Http\Controllers\ServicoController;
+use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,6 +28,17 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+});
+
+Route::post('/logout', LogoutController::class)->middleware('auth')->name('logout');
+
+Route::middleware(['auth', 'active'])->prefix('usuarios')->name('usuarios.')->group(function (): void {
+    Route::get('/', [UsuarioController::class, 'index'])->name('index');
+    Route::get('/novo', [UsuarioController::class, 'create'])->name('create');
+    Route::post('/', [UsuarioController::class, 'store'])->name('store');
+    Route::get('/{usuario}/editar', [UsuarioController::class, 'edit'])->name('edit');
+    Route::put('/{usuario}', [UsuarioController::class, 'update'])->name('update');
+    Route::patch('/{usuario}/status', [UsuarioController::class, 'updateStatus'])->name('status');
 });
 
 /*
