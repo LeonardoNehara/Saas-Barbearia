@@ -18,7 +18,7 @@ class BloqueioProfissionalController extends Controller
         $this->garantirMesmoEstabelecimento($request, $profissional);
 
         if (! $request->expectsJson()) {
-            return redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios');
+            return redirect()->route('profissionais.index');
         }
 
         $bloqueios = $profissional->bloqueios()
