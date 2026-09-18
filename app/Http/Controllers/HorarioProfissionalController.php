@@ -30,7 +30,7 @@ class HorarioProfissionalController extends Controller
         return view('profissionais.disponibilidade', compact('profissional', 'horarios', 'bloqueios'));
     }
 
-    public function store(
+   public function store(
         StoreHorarioProfissionalRequest $request,
         Profissional $profissional
     ): JsonResponse|RedirectResponse {
@@ -46,11 +46,18 @@ class HorarioProfissionalController extends Controller
 
         if ($existeSobreposicao) {
             if (! $request->expectsJson()) {
-                return redirect()->route('profissionais.horarios.index', $profissional)->withErrors(['hora_inicio' => 'O horário informado conflita com outro horário do profissional.'])->withInput();
+                return redirect()
+                    ->route('profissionais.index')
+                    ->withErrors([
+                        'hora_inicio' =>
+                            'O horário informado conflita com outro horário do profissional.',
+                    ])
+                    ->withInput();
             }
 
             return response()->json([
-                'message' => 'O horário informado conflita com outro horário do profissional.',
+                'message' =>
+                    'O horário informado conflita com outro horário do profissional.',
             ], 422);
         }
 
@@ -58,7 +65,9 @@ class HorarioProfissionalController extends Controller
 
         return $request->expectsJson()
             ? response()->json($horario, 201)
-            : redirect()->route('profissionais.horarios.index', $profissional)->with('status', 'Horário adicionado.');
+            : redirect()
+                ->route('profissionais.index')
+                ->with('status', 'Horário adicionado.');
     }
 
     public function destroy(
@@ -76,7 +85,9 @@ class HorarioProfissionalController extends Controller
 
         return $request->expectsJson()
             ? response()->json(null, 204)
-            : redirect()->route('profissionais.horarios.index', $profissional)->with('status', 'Horário removido.');
+            : redirect()
+                ->route('profissionais.index')
+                ->with('status', 'Horário removido.');
     }
 
     private function garantirMesmoEstabelecimento(

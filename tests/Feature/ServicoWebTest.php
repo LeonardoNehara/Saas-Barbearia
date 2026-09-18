@@ -82,7 +82,7 @@ class ServicoWebTest extends TestCase
             ...$this->validData(), 'estabelecimento_id' => $other->estabelecimento_id, 'active' => false,
         ]);
         $service = Servico::where('nome', 'Serviço de teste')->firstOrFail();
-        $response->assertRedirect(route('servicos.edit', $service))->assertSessionHas('status');
+        $response->assertRedirect(route('servicos.index'))->assertSessionHas('status');
         $this->assertSame($admin->estabelecimento_id, $service->estabelecimento_id);
         $this->assertSame('75.90', $service->preco);
         $this->assertTrue($service->active);
@@ -110,8 +110,14 @@ class ServicoWebTest extends TestCase
         $this->actingAs($admin)->get(route('servicos.edit', $service))->assertOk()
             ->assertSee($service->nome)->assertSee($own->nome)->assertDontSee($other->nome)
             ->assertSee('checked', false);
-        $this->put(route('servicos.update', $service), [...$this->validData(), 'estabelecimento_id' => $other->estabelecimento_id, 'active' => false])
-            ->assertRedirect(route('servicos.edit', $service));
+        $this->put(
+            route('servicos.update', $service),
+            [
+                ...$this->validData(),
+                'estabelecimento_id' => $other->estabelecimento_id,
+                'active' => false,
+            ]
+        )->assertRedirect(route('servicos.index'));
         $this->assertSame('75.90', $service->fresh()->preco);
         $this->assertSame($admin->estabelecimento_id, $service->fresh()->estabelecimento_id);
         $this->assertTrue($service->fresh()->active);
@@ -179,10 +185,12 @@ class ServicoWebTest extends TestCase
         $professional = Profissional::factory()->for($admin->estabelecimento)->create();
         $this->actingAs($admin)->put(route('servicos.profissionais', $service), [
             'profissionais_present' => '1', 'profissionais' => [$professional->id],
-        ])->assertRedirect(route('servicos.edit', $service));
+        ])->assertRedirect(route('servicos.index'));
         $this->assertSame([$professional->id], $service->profissionais()->pluck('profissionais.id')->all());
-        $this->put(route('servicos.profissionais', $service), ['profissionais_present' => '1'])
-            ->assertRedirect(route('servicos.edit', $service));
+        $this->put(
+            route('servicos.profissionais', $service),
+            ['profissionais_present' => '1']
+        )->assertRedirect(route('servicos.index'));
         $this->assertSame(0, $service->profissionais()->count());
     }
 

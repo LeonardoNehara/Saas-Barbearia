@@ -36,6 +36,9 @@ class ProfissionalController extends Controller
             $query->with([
                 'servicos' => fn ($query) => $query->where('servicos.estabelecimento_id', $request->user()->estabelecimento_id)->orderBy('nome'),
                 'horarios' => fn ($query) => $query->orderBy('dia_semana')->orderBy('hora_inicio'),
+                'bloqueios' => fn ($query) =>
+                    $query->orderBy('inicio'),
+                'user',
             ]);
         }
 
@@ -47,9 +50,10 @@ class ProfissionalController extends Controller
         }
 
         $servicos = Servico::where('estabelecimento_id', $request->user()->estabelecimento_id)->orderBy('nome')->get();
+        $usuarios = User::where('estabelecimento_id', $request->user()->estabelecimento_id)->with('profissional')->orderBy('name')->get();
         $hasProfessionals = Profissional::where('estabelecimento_id', $request->user()->estabelecimento_id)->exists();
 
-        return view('profissionais.index', compact('profissionais', 'servicos', 'filters', 'hasProfessionals'));
+        return view('profissionais.index', compact('profissionais', 'servicos', 'usuarios', 'filters', 'hasProfessionals'));
     }
 
     public function create(Request $request): View
@@ -78,8 +82,13 @@ class ProfissionalController extends Controller
         $profissional->save();
 
         return $request->expectsJson()
-            ? new ProfissionalResource($profissional->refresh())
-            : redirect()->route('profissionais.edit', $profissional)->with('status', 'Profissional cadastrado. Configure os serviços e horários de atendimento.');
+        ? new ProfissionalResource($profissional->refresh())
+        : redirect()
+            ->route('profissionais.index')
+            ->with(
+                'status',
+                'Profissional cadastrado com sucesso.'
+            );
     }
 
     public function show(Profissional $profissional): ProfissionalResource
@@ -95,7 +104,9 @@ class ProfissionalController extends Controller
 
         return $request->expectsJson()
             ? new ProfissionalResource($profissional->refresh())
-            : redirect()->route('profissionais.edit', $profissional)->with('status', 'Profissional atualizado.');
+            : redirect()
+                ->route('profissionais.index')
+                ->with('status', 'Profissional atualizado com sucesso.');
     }
 
     public function toggleStatus(Request $request, Profissional $profissional): ProfissionalResource|RedirectResponse

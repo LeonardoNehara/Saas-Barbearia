@@ -18,7 +18,7 @@ class BloqueioProfissionalController extends Controller
         $this->garantirMesmoEstabelecimento($request, $profissional);
 
         if (! $request->expectsJson()) {
-            return redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios');
+            return redirect()->route('profissionais.index');
         }
 
         $bloqueios = $profissional->bloqueios()
@@ -43,11 +43,18 @@ class BloqueioProfissionalController extends Controller
 
         if ($existeSobreposicao) {
             if (! $request->expectsJson()) {
-                return redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->withErrors(['inicio' => 'O período informado conflita com outro bloqueio do profissional.'])->withInput();
+                return redirect()
+                    ->route('profissionais.index')
+                    ->withErrors([
+                        'inicio' =>
+                            'O período informado conflita com outro bloqueio do profissional.',
+                    ])
+                    ->withInput();
             }
 
             return response()->json([
-                'message' => 'O período informado conflita com outro bloqueio do profissional.',
+                'message' =>
+                    'O período informado conflita com outro bloqueio do profissional.',
             ], 422);
         }
 
@@ -55,7 +62,9 @@ class BloqueioProfissionalController extends Controller
 
         return $request->expectsJson()
             ? response()->json($bloqueio, 201)
-            : redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->with('status', 'Bloqueio adicionado.');
+            : redirect()
+                ->route('profissionais.index')
+                ->with('status', 'Bloqueio adicionado.');
     }
 
     public function destroy(
@@ -73,7 +82,9 @@ class BloqueioProfissionalController extends Controller
 
         return $request->expectsJson()
             ? response()->json(null, 204)
-            : redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->with('status', 'Bloqueio removido.');
+            : redirect()
+                ->route('profissionais.index')
+                ->with('status', 'Bloqueio removido.');
     }
 
     private function garantirMesmoEstabelecimento(
