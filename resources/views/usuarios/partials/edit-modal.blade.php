@@ -149,32 +149,76 @@
                     Nova senha
                 </label>
 
-                <input
-                    id="edit-user-password-{{ $usuario->id }}"
-                    name="password"
-                    type="password"
-                    minlength="8"
-                    maxlength="255"
-                    class="admin-input"
-                >
+                <div class="relative">
+                    <input
+                        id="edit-user-password-{{ $usuario->id }}"
+                        name="password"
+                        type="password"
+                        minlength="8"
+                        maxlength="255"
+                        autocomplete="new-password"
+                        class="admin-input pr-12"
+                    >
+
+                    <button
+                        type="button"
+                        data-password-toggle
+                        data-password-target="edit-user-password-{{ $usuario->id }}"
+                        aria-label="Mostrar senha"
+                        aria-pressed="false"
+                        class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted hover:text-ink"
+                    >
+                        <x-icon name="eye" class="size-5" />
+                    </button>
+                </div>
+
+                @if ($hasEditErrors)
+                    @error('password')
+                        <p class="mt-2 text-sm text-red-700">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                @endif
             </div>
 
             <div>
                 <label
-                    for="edit-user-password-confirmation-{{ $usuario->id }}"
+                    for="edit-user-password-{{ $usuario->id }}"
                     class="mb-2 block text-sm font-medium"
                 >
-                    Confirmar senha
+                    Nova senha
                 </label>
 
-                <input
-                    id="edit-user-password-confirmation-{{ $usuario->id }}"
-                    name="password_confirmation"
-                    type="password"
-                    minlength="8"
-                    maxlength="255"
-                    class="admin-input"
-                >
+                <div class="relative">
+                    <input
+                        id="edit-user-password-{{ $usuario->id }}"
+                        name="password"
+                        type="password"
+                        minlength="8"
+                        maxlength="255"
+                        autocomplete="new-password"
+                        class="admin-input pr-12"
+                    >
+
+                    <button
+                        type="button"
+                        data-password-toggle
+                        data-password-target="edit-user-password-{{ $usuario->id }}"
+                        aria-label="Mostrar senha"
+                        aria-pressed="false"
+                        class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted hover:text-ink"
+                    >
+                        <x-icon name="eye" class="size-5" />
+                    </button>
+                </div>
+
+                @if ($hasEditErrors)
+                    @error('password')
+                        <p class="mt-2 text-sm text-red-700">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                @endif
             </div>
         </div>
 
