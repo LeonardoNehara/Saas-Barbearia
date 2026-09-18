@@ -1,5 +1,34 @@
 import './admin';
 
+document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
+    const targetId = toggle.dataset.passwordTarget
+        ?? toggle.getAttribute('aria-controls');
+
+    const password = document.getElementById(targetId);
+
+    if (!password) {
+        return;
+    }
+
+    toggle.hidden = false;
+
+    toggle.addEventListener('click', () => {
+        const visible = password.type === 'password';
+
+        password.type = visible ? 'text' : 'password';
+
+        toggle.setAttribute(
+            'aria-label',
+            visible ? 'Esconder senha' : 'Mostrar senha'
+        );
+
+        toggle.setAttribute(
+            'aria-pressed',
+            String(visible)
+        );
+    });
+});
+
 if (document.querySelector('[data-agenda]')) {
     import('./agenda').catch(() => {
         document.querySelector('[data-agenda-message]').textContent = 'Não foi possível iniciar a agenda. Atualize a página para tentar novamente.';
@@ -14,14 +43,6 @@ if (loginForm) {
     const submit = loginForm.querySelector('[type="submit"]');
     const label = loginForm.querySelector('[data-submit-label]');
     let submitting = false;
-
-    toggle.hidden = false;
-    toggle.addEventListener('click', () => {
-        const visible = password.type === 'password';
-        password.type = visible ? 'text' : 'password';
-        toggle.setAttribute('aria-label', visible ? 'Esconder senha' : 'Mostrar senha');
-        toggle.setAttribute('aria-pressed', String(visible));
-    });
 
     loginForm.addEventListener('submit', (event) => {
         if (submitting) {

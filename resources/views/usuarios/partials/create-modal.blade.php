@@ -100,24 +100,39 @@
                 </p>
             </div>
 
-            <div>
+           <div>
                 <label for="create-password" class="mb-2 block text-sm font-medium">
                     Senha *
                 </label>
 
-                <input
-                    id="create-password"
-                    name="password"
-                    type="password"
-                    class="admin-input"
-                    minlength="8"
-                    maxlength="255"
-                    autocomplete="new-password"
-                    required
-                >
+                <div class="relative">
+                    <input
+                        id="create-password"
+                        name="password"
+                        type="password"
+                        class="admin-input pr-12"
+                        minlength="8"
+                        maxlength="255"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        data-password-toggle
+                        data-password-target="create-password"
+                        aria-label="Mostrar senha"
+                        aria-pressed="false"
+                        class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted hover:text-ink"
+                    >
+                        <x-icon name="eye" class="size-5" />
+                    </button>
+                </div>
 
                 @error('password')
-                    <p class="mt-2 text-sm text-red-700">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-red-700">
+                        {{ $message }}
+                    </p>
                 @enderror
             </div>
 
@@ -129,16 +144,29 @@
                     Confirmar senha *
                 </label>
 
-                <input
-                    id="create-password-confirmation"
-                    name="password_confirmation"
-                    type="password"
-                    class="admin-input"
-                    minlength="8"
-                    maxlength="255"
-                    autocomplete="new-password"
-                    required
-                >
+                <div class="relative">
+                    <input
+                        id="create-password-confirmation"
+                        name="password_confirmation"
+                        type="password"
+                        class="admin-input pr-12"
+                        minlength="8"
+                        maxlength="255"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        data-password-toggle
+                        data-password-target="create-password-confirmation"
+                        aria-label="Mostrar senha"
+                        aria-pressed="false"
+                        class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted hover:text-ink"
+                    >
+                        <x-icon name="eye" class="size-5" />
+                    </button>
+                </div>
             </div>
         </div>
 
