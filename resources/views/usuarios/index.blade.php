@@ -35,7 +35,15 @@
                             <td class="px-5 py-5"><x-role-badge :role="$usuario->role" /></td>
                             <td class="px-5 py-5"><x-status-badge :active="$usuario->active" /></td>
                             <td class="px-5 py-5"><div class="flex items-center justify-end gap-1">
-                                <a href="{{ route('usuarios.edit', $usuario) }}" aria-label="Editar {{ $usuario->name }}" title="Editar usuário" class="rounded-lg p-3 text-muted hover:bg-slate-100 hover:text-brand-dark"><x-icon name="edit" class="size-4" /></a>
+                                <button
+                                    type="button"
+                                    aria-label="Editar {{ $usuario->name }}"
+                                    title="Editar usuário"
+                                    class="rounded-lg p-3 text-muted hover:bg-slate-100 hover:text-brand-dark"
+                                    onclick="document.getElementById('modal-editar-usuario-{{ $usuario->id }}').showModal()"
+                                >
+                                    <x-icon name="edit" class="size-4" />
+                                </button>
                                 @can('changeStatus', $usuario)
                                     <form method="POST" action="{{ route('usuarios.status', $usuario) }}" data-confirm="{{ $usuario->active ? 'Desativar' : 'Ativar' }} o acesso de {{ $usuario->name }}?" data-busy-form>
                                         @csrf @method('PATCH')<input type="hidden" name="active" value="{{ $usuario->active ? '0' : '1' }}">
@@ -54,11 +62,38 @@
     </section>
     <p class="mt-3 text-xs text-muted sm:hidden">Deslize a tabela para ver todas as colunas e ações.</p>
     @include('usuarios.partials.create-modal')
+        @foreach ($usuarios as $usuario)
+        @include('usuarios.partials.edit-modal', [
+            'usuario' => $usuario,
+        ])
+    @endforeach
     @if ($errors->any())
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 document
                     .getElementById('modal-novo-usuario')
+                    ?.showModal();
+            });
+        </script>
+    @endif
+    @if (
+        $errors->any()
+        && str_starts_with(
+            old('form_context', ''),
+            'edit-usuario-'
+        )
+    )
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const context = @json(old('form_context'));
+
+                const usuarioId = context.replace(
+                    'edit-usuario-',
+                    ''
+                );
+
+                document
+                    .getElementById(`modal-editar-usuario-${usuarioId}`)
                     ?.showModal();
             });
         </script>

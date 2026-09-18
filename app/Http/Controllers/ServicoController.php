@@ -31,6 +31,9 @@ class ServicoController extends Controller
                 });
             })
             ->when(isset($filters['active']), fn (Builder $query): Builder => $query->where('active', $filters['active']));
+        if (! $request->expectsJson()) {
+            $query->with('profissionais');
+        }
         $servicos = $query->orderBy('id')->paginate($filters['per_page'] ?? ($request->expectsJson() ? 15 : 10))
             ->appends($request->safe()->except('page'));
 
@@ -40,7 +43,14 @@ class ServicoController extends Controller
 
         $hasServices = Servico::where('estabelecimento_id', $request->user()->estabelecimento_id)->exists();
 
-        return view('servicos.index', compact('servicos', 'filters', 'hasServices'));
+        $profissionais = Profissional::where(
+            'estabelecimento_id',
+            $request->user()->estabelecimento_id
+        )
+            ->orderBy('nome')
+            ->get();
+
+        return view('servicos.index', compact('servicos', 'profissionais', 'filters', 'hasServices'));
     }
 
     public function create(): View
@@ -68,7 +78,9 @@ class ServicoController extends Controller
 
         return $request->expectsJson()
             ? new ServicoResource($servico->refresh())
-            : redirect()->route('servicos.edit', $servico)->with('status', 'Serviço cadastrado. Agora você pode selecionar os profissionais que o realizam.');
+            : redirect()
+                ->route('servicos.index')
+                ->with('status', 'Serviço cadastrado com sucesso.');
     }
 
     public function show(Servico $servico): ServicoResource
@@ -84,7 +96,9 @@ class ServicoController extends Controller
 
         return $request->expectsJson()
             ? new ServicoResource($servico->refresh())
-            : redirect()->route('servicos.edit', $servico)->with('status', 'Serviço atualizado com sucesso.');
+            : redirect()
+                ->route('servicos.index')
+                ->with('status', 'Serviço atualizado com sucesso.');
     }
 
     public function toggleStatus(Request $request, Servico $servico): ServicoResource|RedirectResponse
@@ -117,6 +131,11 @@ class ServicoController extends Controller
 
         return $request->expectsJson()
             ? $resource
-            : redirect()->route('servicos.edit', $servico)->with('status', 'Profissionais do serviço atualizados.');
+            : redirect()
+                ->route('servicos.index')
+                ->with(
+                    'status',
+                    'Profissionais do serviço atualizados.'
+                );
     }
 }
