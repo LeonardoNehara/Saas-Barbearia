@@ -43,20 +43,19 @@ class BloqueioProfissionalController extends Controller
 
         if ($existeSobreposicao) {
             if (! $request->expectsJson()) {
-                return $request->expectsJson()
-                    ? response()->json(null, 204)
-                    : redirect()
-                        ->route('profissionais.index')
-                        ->with('status', 'Horário removido.');
+                return redirect()
+                    ->route('profissionais.index')
+                    ->withErrors([
+                        'inicio' =>
+                            'O período informado conflita com outro bloqueio do profissional.',
+                    ])
+                    ->withInput();
             }
 
-            return redirect()
-                ->route('profissionais.index')
-                ->withErrors([
-                    'inicio' =>
-                        'O período informado conflita com outro bloqueio do profissional.',
-                ])
-                ->withInput();
+            return response()->json([
+                'message' =>
+                    'O período informado conflita com outro bloqueio do profissional.',
+            ], 422);
         }
 
         $bloqueio = $profissional->bloqueios()->create($dados);
