@@ -43,19 +43,29 @@ class BloqueioProfissionalController extends Controller
 
         if ($existeSobreposicao) {
             if (! $request->expectsJson()) {
-                return redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->withErrors(['inicio' => 'O período informado conflita com outro bloqueio do profissional.'])->withInput();
+                return $request->expectsJson()
+                    ? response()->json(null, 204)
+                    : redirect()
+                        ->route('profissionais.index')
+                        ->with('status', 'Horário removido.');
             }
 
-            return response()->json([
-                'message' => 'O período informado conflita com outro bloqueio do profissional.',
-            ], 422);
+            return redirect()
+                ->route('profissionais.index')
+                ->withErrors([
+                    'inicio' =>
+                        'O período informado conflita com outro bloqueio do profissional.',
+                ])
+                ->withInput();
         }
 
         $bloqueio = $profissional->bloqueios()->create($dados);
 
         return $request->expectsJson()
             ? response()->json($bloqueio, 201)
-            : redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->with('status', 'Bloqueio adicionado.');
+            : redirect()
+                ->route('profissionais.index')
+                ->with('status', 'Bloqueio adicionado.');
     }
 
     public function destroy(
@@ -73,7 +83,9 @@ class BloqueioProfissionalController extends Controller
 
         return $request->expectsJson()
             ? response()->json(null, 204)
-            : redirect()->to(route('profissionais.horarios.index', $profissional).'#bloqueios')->with('status', 'Bloqueio removido.');
+            : redirect()
+                ->route('profissionais.index')
+                ->with('status', 'Bloqueio removido.');
     }
 
     private function garantirMesmoEstabelecimento(

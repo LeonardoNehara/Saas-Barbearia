@@ -106,9 +106,13 @@
                                         {{ substr($horario->hora_inicio, 0, 5) }}–{{ substr($horario->hora_fim, 0, 5) }}
                                 </p>@empty<p>Sem horários definidos</p>
                                     @endforelse @if ($profissional->horarios->count() > 2)
-                                        <a href="{{ route('profissionais.horarios.index', $profissional) }}"
-                                            class="inline-block rounded py-1 text-brand-dark underline">+{{ $profissional->horarios->count() - 2 }}
-                                            faixas</a>
+                                        <button
+                                            type="button"
+                                            class="inline-block rounded py-1 text-brand-dark underline"
+                                            onclick="document.getElementById('modal-disponibilidade-profissional-{{ $profissional->id }}').showModal()"
+                                        >
+                                            +{{ $profissional->horarios->count() - 2 }} faixas
+                                        </button>
                                     @endif
                             </td>
                             <td class="px-3 py-5"><x-status-badge :active="$profissional->active" /></td>
@@ -123,11 +127,15 @@
                                     >
                                         <x-icon name="edit" class="size-4" />
                                     </button>
-                                    <a href="{{ route('profissionais.horarios.index', $profissional) }}"
+                                    <button
+                                        type="button"
                                         aria-label="Gerenciar horários e bloqueios de {{ $profissional->nome }}"
                                         title="Horários e bloqueios"
-                                        class="rounded-lg border border-slate-200 p-2.5 text-muted hover:bg-slate-100"><x-icon
-                                            name="calendar" class="size-4" /></a>
+                                        class="rounded-lg border border-slate-200 p-2.5 text-muted hover:bg-slate-100"
+                                        onclick="document.getElementById('modal-disponibilidade-profissional-{{ $profissional->id }}').showModal()"
+                                    >
+                                        <x-icon name="calendar" class="size-4" />
+                                    </button>
                                     <form method="POST" action="{{ route('profissionais.status', $profissional) }}"
                                         data-busy-form
                                         data-confirm="{{ $profissional->active ? 'Desativar' : 'Ativar' }} {{ $profissional->nome }}?">
@@ -164,6 +172,11 @@
             'usuarios' => $usuarios,
         ])
     @endforeach
+    @foreach ($profissionais as $profissional)
+        @include('profissionais.partials.disponibilidade-modal', [
+            'profissional' => $profissional,
+        ])
+    @endforeach
     @if (
         $errors->any()
         && old('form_context') === 'create-profissional'
@@ -195,6 +208,29 @@
                 document
                     .getElementById(
                         `modal-editar-profissional-${profissionalId}`
+                    )
+                    ?.showModal();
+            });
+        </script>
+    @endif
+    @if (
+        $errors->any()
+        && (
+            str_starts_with(old('form_context', ''), 'horario-profissional-')
+            || str_starts_with(old('form_context', ''), 'bloqueio-profissional-')
+        )
+    )
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const context = @json(old('form_context'));
+
+                const profissionalId = context
+                    .replace('horario-profissional-', '')
+                    .replace('bloqueio-profissional-', '');
+
+                document
+                    .getElementById(
+                        `modal-disponibilidade-profissional-${profissionalId}`
                     )
                     ?.showModal();
             });

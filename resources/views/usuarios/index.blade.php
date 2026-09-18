@@ -78,6 +78,7 @@
     @endif
     @if (
         $errors->any()
+        && old('form_context') === 'create-usuario'
         && str_starts_with(
             old('form_context', ''),
             'edit-usuario-'

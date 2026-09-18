@@ -46,7 +46,11 @@ class HorarioProfissionalController extends Controller
 
         if ($existeSobreposicao) {
             if (! $request->expectsJson()) {
-                return redirect()->route('profissionais.horarios.index', $profissional)->withErrors(['hora_inicio' => 'O horário informado conflita com outro horário do profissional.'])->withInput();
+                return $request->expectsJson()
+                    ? response()->json($horario, 201)
+                    : redirect()
+                        ->route('profissionais.index')
+                        ->with('status', 'Horário adicionado.');
             }
 
             return response()->json([
@@ -74,9 +78,13 @@ class HorarioProfissionalController extends Controller
 
         $horario->delete();
 
-        return $request->expectsJson()
-            ? response()->json(null, 204)
-            : redirect()->route('profissionais.horarios.index', $profissional)->with('status', 'Horário removido.');
+        return redirect()
+            ->route('profissionais.index')
+            ->withErrors([
+                'inicio' =>
+                    'O período informado conflita com outro bloqueio do profissional.',
+            ])
+            ->withInput();
     }
 
     private function garantirMesmoEstabelecimento(
