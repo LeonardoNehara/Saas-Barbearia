@@ -9,23 +9,28 @@ use App\Models\HorarioProfissional;
 use App\Models\Profissional;
 use App\Models\Servico;
 use App\Services\AgendamentoService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
-use Carbon\Carbon;
 
 class AgendamentoServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     private Estabelecimento $estabelecimento;
+
     private Profissional $profissional;
+
     private Servico $servico;
+
     private AgendamentoService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        Carbon::setTestNow(Carbon::parse('2026-09-20 12:00:00', 'America/Sao_Paulo'));
 
         $this->estabelecimento = Estabelecimento::factory()->create([
             'timezone' => 'America/Sao_Paulo',
@@ -79,7 +84,7 @@ class AgendamentoServiceTest extends TestCase
     {
         $agendamento = $this->service->criar(
             $this->estabelecimento,
-            $this->dados()
+            $this->dados(['inicio' => '2026-09-21 14:15:00'])
         );
 
         $this->assertDatabaseHas('agendamentos', [
@@ -93,12 +98,12 @@ class AgendamentoServiceTest extends TestCase
         ]);
 
         $this->assertSame(
-            '2026-09-21 14:00:00',
+            '2026-09-21 14:15:00',
             $agendamento->inicio->format('Y-m-d H:i:s')
         );
 
         $this->assertSame(
-            '2026-09-21 14:30:00',
+            '2026-09-21 14:45:00',
             $agendamento->fim->format('Y-m-d H:i:s')
         );
     }

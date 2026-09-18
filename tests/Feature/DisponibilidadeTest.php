@@ -6,6 +6,7 @@ use App\Models\Estabelecimento;
 use App\Models\HorarioProfissional;
 use App\Models\Profissional;
 use App\Models\Servico;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,12 +15,16 @@ class DisponibilidadeTest extends TestCase
     use RefreshDatabase;
 
     private Estabelecimento $estabelecimento;
+
     private Profissional $profissional;
+
     private Servico $servico;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->travelTo(Carbon::parse('2026-09-20 12:00:00', 'America/Sao_Paulo'));
 
         $this->estabelecimento = Estabelecimento::factory()->create([
             'slug' => 'barbearia-teste',
@@ -55,7 +60,7 @@ class DisponibilidadeTest extends TestCase
     public function test_visitante_pode_consultar_disponibilidade(): void
     {
         $response = $this->getJson(
-            '/publico/barbearia-teste/disponibilidade?' .
+            '/publico/barbearia-teste/disponibilidade?'.
             http_build_query([
                 'profissional_id' => $this->profissional->id,
                 'servico_id' => $this->servico->id,
@@ -65,7 +70,9 @@ class DisponibilidadeTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonCount(4, 'data')
+            ->assertJsonCount(7, 'data')
+            ->assertJsonPath('data.1.inicio', '2026-09-21 08:15:00')
+            ->assertJsonPath('data.1.fim', '2026-09-21 08:45:00')
             ->assertJsonPath(
                 'data.0.inicio',
                 '2026-09-21 08:00:00'
@@ -78,7 +85,7 @@ class DisponibilidadeTest extends TestCase
         $this->estabelecimento->save();
 
         $this->getJson(
-            '/publico/barbearia-teste/disponibilidade?' .
+            '/publico/barbearia-teste/disponibilidade?'.
             http_build_query([
                 'profissional_id' => $this->profissional->id,
                 'servico_id' => $this->servico->id,
@@ -90,7 +97,7 @@ class DisponibilidadeTest extends TestCase
     public function test_slug_inexistente_retorna_404(): void
     {
         $this->getJson(
-            '/publico/nao-existe/disponibilidade?' .
+            '/publico/nao-existe/disponibilidade?'.
             http_build_query([
                 'profissional_id' => $this->profissional->id,
                 'servico_id' => $this->servico->id,
@@ -116,7 +123,7 @@ class DisponibilidadeTest extends TestCase
     public function test_data_deve_estar_no_formato_correto(): void
     {
         $this->getJson(
-            '/publico/barbearia-teste/disponibilidade?' .
+            '/publico/barbearia-teste/disponibilidade?'.
             http_build_query([
                 'profissional_id' => $this->profissional->id,
                 'servico_id' => $this->servico->id,

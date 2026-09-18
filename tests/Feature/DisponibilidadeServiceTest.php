@@ -9,23 +9,28 @@ use App\Models\HorarioProfissional;
 use App\Models\Profissional;
 use App\Models\Servico;
 use App\Services\DisponibilidadeService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
-use Carbon\Carbon;
 
 class DisponibilidadeServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     private Estabelecimento $estabelecimento;
+
     private Profissional $profissional;
+
     private Servico $servico;
+
     private DisponibilidadeService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        Carbon::setTestNow(Carbon::parse('2026-09-20 12:00:00', 'America/Sao_Paulo'));
 
         $this->estabelecimento = Estabelecimento::factory()->create([
             'timezone' => 'America/Sao_Paulo',
@@ -50,7 +55,7 @@ class DisponibilidadeServiceTest extends TestCase
 
         $this->service = app(DisponibilidadeService::class);
     }
-    
+
     protected function tearDown(): void
     {
         Carbon::setTestNow();
@@ -93,12 +98,24 @@ class DisponibilidadeServiceTest extends TestCase
                 'fim' => '2026-09-21 08:30:00',
             ],
             [
+                'inicio' => '2026-09-21 08:15:00',
+                'fim' => '2026-09-21 08:45:00',
+            ],
+            [
                 'inicio' => '2026-09-21 08:30:00',
                 'fim' => '2026-09-21 09:00:00',
             ],
             [
+                'inicio' => '2026-09-21 08:45:00',
+                'fim' => '2026-09-21 09:15:00',
+            ],
+            [
                 'inicio' => '2026-09-21 09:00:00',
                 'fim' => '2026-09-21 09:30:00',
+            ],
+            [
+                'inicio' => '2026-09-21 09:15:00',
+                'fim' => '2026-09-21 09:45:00',
             ],
             [
                 'inicio' => '2026-09-21 09:30:00',
@@ -131,12 +148,16 @@ class DisponibilidadeServiceTest extends TestCase
             '2026-09-21'
         );
 
-        $this->assertCount(3, $slots);
+        $this->assertSame([
+            '2026-09-21 08:00:00',
+            '2026-09-21 09:00:00',
+            '2026-09-21 09:15:00',
+            '2026-09-21 09:30:00',
+        ], array_column($slots, 'inicio'));
 
         $this->assertFalse(
             collect($slots)->contains(
-                fn (array $slot) =>
-                    $slot['inicio'] === '2026-09-21 08:30:00'
+                fn (array $slot) => $slot['inicio'] === '2026-09-21 08:30:00'
             )
         );
     }
@@ -163,12 +184,16 @@ class DisponibilidadeServiceTest extends TestCase
             '2026-09-21'
         );
 
-        $this->assertCount(3, $slots);
+        $this->assertSame([
+            '2026-09-21 08:00:00',
+            '2026-09-21 08:15:00',
+            '2026-09-21 08:30:00',
+            '2026-09-21 09:30:00',
+        ], array_column($slots, 'inicio'));
 
         $this->assertFalse(
             collect($slots)->contains(
-                fn (array $slot) =>
-                    $slot['inicio'] === '2026-09-21 09:00:00'
+                fn (array $slot) => $slot['inicio'] === '2026-09-21 09:00:00'
             )
         );
     }
@@ -234,6 +259,10 @@ class DisponibilidadeServiceTest extends TestCase
                 'fim' => '2026-09-21 09:00:00',
             ],
             [
+                'inicio' => '2026-09-21 08:15:00',
+                'fim' => '2026-09-21 09:15:00',
+            ],
+            [
                 'inicio' => '2026-09-21 08:30:00',
                 'fim' => '2026-09-21 09:30:00',
             ],
@@ -264,7 +293,7 @@ class DisponibilidadeServiceTest extends TestCase
             '2026-09-21'
         );
 
-        $this->assertCount(2, $slots);
+        $this->assertCount(3, $slots);
     }
 
     public function test_dia_sem_jornada_retorna_lista_vazia(): void
@@ -474,7 +503,9 @@ class DisponibilidadeServiceTest extends TestCase
 
         $this->assertSame([
             '2026-09-21 14:30:00',
+            '2026-09-21 14:45:00',
             '2026-09-21 15:00:00',
+            '2026-09-21 15:15:00',
             '2026-09-21 15:30:00',
         ], $inicios);
     }
@@ -504,5 +535,4 @@ class DisponibilidadeServiceTest extends TestCase
 
         $this->assertSame([], $slots);
     }
-
 }

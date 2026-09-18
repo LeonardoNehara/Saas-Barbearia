@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class DisponibilidadeService
 {
-    private const INTERVALO_SLOTS_MINUTOS = 30;
+    private const INTERVALO_SLOTS_MINUTOS = 15;
 
     public function buscar(
         Estabelecimento $estabelecimento,
@@ -24,7 +24,7 @@ class DisponibilidadeService
             ->where('active', true)
             ->first();
 
-        if (!$profissional) {
+        if (! $profissional) {
             throw ValidationException::withMessages([
                 'profissional_id' => 'Profissional inválido ou indisponível.',
             ]);
@@ -36,13 +36,13 @@ class DisponibilidadeService
             ->where('active', true)
             ->first();
 
-        if (!$servico) {
+        if (! $servico) {
             throw ValidationException::withMessages([
                 'servico_id' => 'Serviço inválido ou indisponível.',
             ]);
         }
 
-        if (!$profissional->servicos()->whereKey($servico->id)->exists()) {
+        if (! $profissional->servicos()->whereKey($servico->id)->exists()) {
             throw ValidationException::withMessages([
                 'servico_id' => 'Este profissional não realiza o serviço informado.',
             ]);
@@ -93,7 +93,8 @@ class DisponibilidadeService
                 $estabelecimento->timezone
             );
 
-            $inicioSlot = $inicioJornada->copy();
+            $inicioSlot = $inicioJornada->copy()
+                ->ceilMinutes(self::INTERVALO_SLOTS_MINUTOS);
 
             while (true) {
                 $fimSlot = $inicioSlot->copy()
@@ -106,13 +107,13 @@ class DisponibilidadeService
                 $slotJaPassou = $inicioSlot->lt($agora);
 
                 if (
-                    !$slotJaPassou
-                    && !$this->conflitaComPeriodos(
+                    ! $slotJaPassou
+                    && ! $this->conflitaComPeriodos(
                         $inicioSlot,
                         $fimSlot,
                         $bloqueios
                     )
-                    && !$this->conflitaComPeriodos(
+                    && ! $this->conflitaComPeriodos(
                         $inicioSlot,
                         $fimSlot,
                         $agendamentos
