@@ -7,8 +7,8 @@ use App\Models\Estabelecimento;
 use App\Models\Profissional;
 use App\Models\Servico;
 use Carbon\Carbon;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class AgendamentoService
 {
@@ -24,7 +24,7 @@ class AgendamentoService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$profissional) {
+            if (! $profissional) {
                 throw ValidationException::withMessages([
                     'profissional_id' => 'Profissional inválido ou indisponível.',
                 ]);
@@ -36,7 +36,7 @@ class AgendamentoService
                 ->where('active', true)
                 ->first();
 
-            if (!$servico) {
+            if (! $servico) {
                 throw ValidationException::withMessages([
                     'servico_id' => 'Serviço inválido ou indisponível.',
                 ]);
@@ -46,7 +46,7 @@ class AgendamentoService
                 ->whereKey($servico->id)
                 ->exists();
 
-            if (!$executaServico) {
+            if (! $executaServico) {
                 throw ValidationException::withMessages([
                     'servico_id' => 'Este profissional não realiza o serviço informado.',
                 ]);
@@ -56,6 +56,12 @@ class AgendamentoService
                 $dados['inicio'],
                 $estabelecimento->timezone
             );
+
+            if ($inicio->minute % 15 !== 0 || $inicio->second !== 0 || $inicio->microsecond !== 0) {
+                throw ValidationException::withMessages([
+                    'inicio' => 'O horário de início deve estar em intervalos de 15 minutos, sem segundos ou frações de segundo.',
+                ]);
+            }
 
             $fim = $inicio->copy()
                 ->addMinutes($servico->duracao_minutos);
@@ -115,7 +121,7 @@ class AgendamentoService
             ->where('hora_fim', '>=', $fim->format('H:i:s'))
             ->exists();
 
-        if (!$dentroDoHorario) {
+        if (! $dentroDoHorario) {
             throw ValidationException::withMessages([
                 'inicio' => 'O horário está fora da jornada do profissional.',
             ]);
