@@ -11,11 +11,48 @@
         <a href="{{ route('profissionais.index') }}" @class(['admin-nav', 'admin-nav-active' => request()->routeIs('profissionais.*')]) @if(request()->routeIs('profissionais.*')) aria-current="page" @endif><x-icon name="user" class="size-5" />Profissionais</a>
     @endcan
 </nav>
-@if (auth()->user()->estabelecimento)
-    <div class="mt-auto pt-10">
-        <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-4">
-            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand"><x-icon name="store" class="size-5" /></span>
-            <div class="min-w-0"><p class="break-words text-sm font-medium">{{ auth()->user()->estabelecimento->nome }}</p><p class="mt-1 text-[11px] text-brand">Seu estabelecimento</p></div>
+<div class="mt-auto space-y-3 pt-10">
+
+    <div class="rounded-xl border border-white/10 bg-white/5 p-3">
+
+        <div class="flex items-center gap-3">
+            <span
+                class="flex size-10 shrink-0 items-center justify-center rounded-full
+                       border border-brand/40 bg-brand/15 text-sm font-semibold text-brand"
+            >
+                {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+            </span>
+
+            <div class="min-w-0">
+                <p class="truncate text-sm font-medium text-white">
+                    {{ auth()->user()->name }}
+                </p>
+
+                <p class="mt-0.5 text-[11px] text-white/60">
+                    {{ auth()->user()->isAdmin() ? 'Administrador' : 'Barbeiro' }}
+                </p>
+            </div>
         </div>
+
+        <form
+            method="POST"
+            action="{{ route('logout') }}"
+            class="mt-3"
+        >
+            @csrf
+
+            <button
+                type="submit"
+                class="flex w-full items-center gap-2 rounded-lg border border-brand/40
+                       px-3 py-2 text-sm text-brand transition
+                       hover:bg-brand/10"
+            >
+                <x-icon name="logout" class="size-4" />
+
+                <span>Sair</span>
+            </button>
+        </form>
+
     </div>
-@endif
+
+</div>
