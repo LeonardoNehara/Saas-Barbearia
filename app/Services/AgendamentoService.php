@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Agendamento;
 use App\Models\Estabelecimento;
+use App\Models\HorarioProfissional;
 use App\Models\Profissional;
 use App\Models\Servico;
 use Carbon\Carbon;
@@ -119,9 +120,10 @@ class AgendamentoService
             ->where('dia_semana', $diaSemana)
             ->where('hora_inicio', '<=', $inicio->format('H:i:s'))
             ->where('hora_fim', '>=', $fim->format('H:i:s'))
-            ->exists();
+            ->get()
+            ->contains(fn (HorarioProfissional $horario): bool => ! $horario->conflitaComIntervalo($inicio, $fim));
 
-        if (! $dentroDoHorario) {
+        if (! $inicio->isSameDay($fim) || ! $dentroDoHorario) {
             throw ValidationException::withMessages([
                 'inicio' => 'O horário está fora da jornada do profissional.',
             ]);

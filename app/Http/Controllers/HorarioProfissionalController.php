@@ -8,6 +8,7 @@ use App\Models\Profissional;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class HorarioProfissionalController extends Controller
@@ -25,12 +26,10 @@ class HorarioProfissionalController extends Controller
             return response()->json($horarios);
         }
 
-        $bloqueios = $profissional->bloqueios()->orderBy('inicio')->get();
-
-        return view('profissionais.disponibilidade', compact('profissional', 'horarios', 'bloqueios'));
+        return view('profissionais.disponibilidade', compact('profissional', 'horarios'));
     }
 
-   public function store(
+    public function store(
         StoreHorarioProfissionalRequest $request,
         Profissional $profissional
     ): JsonResponse|RedirectResponse {
@@ -49,15 +48,13 @@ class HorarioProfissionalController extends Controller
                 return redirect()
                     ->route('profissionais.index')
                     ->withErrors([
-                        'hora_inicio' =>
-                            'O horário informado conflita com outro horário do profissional.',
+                        'hora_inicio' => 'O horário informado conflita com outro horário do profissional.',
                     ])
                     ->withInput();
             }
 
             return response()->json([
-                'message' =>
-                    'O horário informado conflita com outro horário do profissional.',
+                'message' => 'O horário informado conflita com outro horário do profissional.',
             ], 422);
         }
 
@@ -68,6 +65,35 @@ class HorarioProfissionalController extends Controller
             : redirect()
                 ->route('profissionais.index')
                 ->with('status', 'Horário adicionado.');
+    }
+
+    public function update(
+        StoreHorarioProfissionalRequest $request,
+        Profissional $profissional,
+        HorarioProfissional $horario
+    ): JsonResponse|RedirectResponse {
+        $this->garantirMesmoEstabelecimento($request, $profissional);
+        abort_unless($horario->profissional_id === $profissional->id, 404);
+
+        $dados = $request->validated();
+        $existeSobreposicao = $profissional->horarios()
+            ->where('id', '!=', $horario->id)
+            ->where('dia_semana', $dados['dia_semana'])
+            ->where('hora_inicio', '<', $dados['hora_fim'])
+            ->where('hora_fim', '>', $dados['hora_inicio'])
+            ->exists();
+
+        if ($existeSobreposicao) {
+            throw ValidationException::withMessages([
+                'hora_inicio' => 'O horário informado conflita com outro horário do profissional.',
+            ]);
+        }
+
+        $horario->update($dados + ['intervalo_inicio' => null, 'intervalo_fim' => null]);
+
+        return $request->expectsJson()
+            ? response()->json($horario)
+            : redirect()->route('profissionais.index')->with('status', 'Horário atualizado.');
     }
 
     public function destroy(

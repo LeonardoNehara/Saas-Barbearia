@@ -30,7 +30,14 @@ document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
 });
 
 if (document.querySelector('[data-agenda]')) {
-    import('./agenda').catch(() => {
+    import('./agenda').then(() => {
+        requestAnimationFrame(() => {
+            document.getElementById('agenda-title')?.scrollIntoView({
+                behavior: 'instant',
+                block: 'start',
+            });
+        });
+    }).catch(() => {
         document.querySelector('[data-agenda-message]').textContent = 'Não foi possível iniciar a agenda. Atualize a página para tentar novamente.';
     });
 }

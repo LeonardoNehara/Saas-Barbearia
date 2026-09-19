@@ -36,13 +36,18 @@ class AgendamentoController extends Controller
                 'now' => CarbonImmutable::now($estabelecimento->timezone)->format('Y-m-d\TH:i:s'),
                 'services' => $servicos->map(fn (Servico $servico): array => [
                     'id' => $servico->id, 'name' => $servico->nome,
+                    'duration' => $servico->duracao_minutos,
+                    'price' => $servico->preco,
                     'professionals' => $servico->profissionais->map(fn (Profissional $profissional): array => ['id' => $profissional->id, 'name' => $profissional->nome])->values(),
                 ])->values(),
                 'professionals' => $profissionais->map(fn (Profissional $profissional): array => [
                     'id' => $profissional->id,
+                    'name' => $profissional->nome,
+                    'active' => $profissional->active,
                     'hours' => $profissional->horarios->map(fn ($horario): array => [
                         'daysOfWeek' => [(int) $horario->dia_semana],
                         'startTime' => $horario->hora_inicio, 'endTime' => $horario->hora_fim,
+                        'breakStart' => $horario->intervalo_inicio, 'breakEnd' => $horario->intervalo_fim,
                     ])->values(),
                 ])->values(),
             ];
@@ -83,6 +88,8 @@ class AgendamentoController extends Controller
                         'id' => 'bloqueio-'.$block->id, 'title' => 'Indisponível',
                         'start' => $block->inicio->format('Y-m-d\TH:i:s'), 'end' => $block->fim->format('Y-m-d\TH:i:s'),
                         'display' => 'background', 'backgroundColor' => '#f5c7c7',
+                        'classNames' => ['agenda-blocked'],
+                        'extendedProps' => ['kind' => 'blocked'],
                     ]);
                 }
             }

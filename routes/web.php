@@ -191,6 +191,8 @@ Route::middleware(['auth', 'active'])
                     [HorarioProfissionalController::class, 'store']
                 )->name('store');
 
+                Route::put('/{horario}', [HorarioProfissionalController::class, 'update'])->name('update');
+
                 Route::delete(
                     '/{horario}',
                     [HorarioProfissionalController::class, 'destroy']
