@@ -73,3 +73,11 @@ if (loginForm) {
         toggle.setAttribute('aria-pressed', 'false');
     });
 }
+
+if (
+    document.querySelector(
+        '[data-public-booking]'
+    )
+) {
+    import('./public-booking');
+}

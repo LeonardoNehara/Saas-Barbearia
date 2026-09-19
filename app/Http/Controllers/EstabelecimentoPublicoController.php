@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Estabelecimento;
 use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
 
 class EstabelecimentoPublicoController extends Controller
 {
@@ -77,6 +78,31 @@ class EstabelecimentoPublicoController extends Controller
 
         return response()->json([
             'data' => $profissionais,
+        ]);
+    }
+
+    public function agendar(
+        Estabelecimento $estabelecimento
+    ): View {
+        if (! $estabelecimento->active) {
+            abort(404);
+        }
+
+        $servicos = $estabelecimento
+            ->servicos()
+            ->where('active', true)
+            ->orderBy('nome')
+            ->get([
+                'id',
+                'nome',
+                'descricao',
+                'duracao_minutos',
+                'preco',
+            ]);
+
+        return view('publico.agendamento', [
+            'estabelecimento' => $estabelecimento,
+            'servicos' => $servicos,
         ]);
     }
 }

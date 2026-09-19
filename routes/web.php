@@ -50,6 +50,10 @@ Route::middleware(['auth', 'active'])->prefix('usuarios')->name('usuarios.')->gr
 | serviços, profissionais, disponibilidade e realizar agendamentos.
 |
 */
+Route::get(
+    '/agendar/{estabelecimento}',
+    [EstabelecimentoPublicoController::class, 'agendar']
+)->name('agendar');
 
 Route::prefix('publico/{estabelecimento}')
     ->name('publico.')
