@@ -18,6 +18,19 @@ class Profissional extends Model
 
     protected $table = 'profissionais';
 
+    protected static function booted(): void
+    {
+        static::created(function (Profissional $profissional): void {
+            foreach (range(1, 6) as $diaSemana) {
+                $profissional->horarios()->create([
+                    'dia_semana' => $diaSemana,
+                    'hora_inicio' => '08:00',
+                    'hora_fim' => '19:00',
+                ]);
+            }
+        });
+    }
+
     /** @return BelongsToMany<Servico, $this> */
     public function servicos(): BelongsToMany
     {

@@ -108,6 +108,7 @@ class DisponibilidadeService
 
                 if (
                     ! $slotJaPassou
+                    && ! $horario->conflitaComIntervalo($inicioSlot, $fimSlot)
                     && ! $this->conflitaComPeriodos(
                         $inicioSlot,
                         $fimSlot,

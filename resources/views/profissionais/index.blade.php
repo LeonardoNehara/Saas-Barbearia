@@ -130,7 +130,7 @@
                                     <button
                                         type="button"
                                         aria-label="Gerenciar horários e bloqueios de {{ $profissional->nome }}"
-                                        title="Horários e bloqueios"
+                                        title="Horários e intervalos"
                                         class="rounded-lg border border-slate-200 p-2.5 text-muted hover:bg-slate-100"
                                         onclick="document.getElementById('modal-disponibilidade-profissional-{{ $profissional->id }}').showModal()"
                                     >
@@ -217,7 +217,6 @@
         $errors->any()
         && (
             str_starts_with(old('form_context', ''), 'horario-profissional-')
-            || str_starts_with(old('form_context', ''), 'bloqueio-profissional-')
         )
     )
         <script>
@@ -225,8 +224,7 @@
                 const context = @json(old('form_context'));
 
                 const profissionalId = context
-                    .replace('horario-profissional-', '')
-                    .replace('bloqueio-profissional-', '');
+                    .replace('horario-profissional-', '');
 
                 document
                     .getElementById(

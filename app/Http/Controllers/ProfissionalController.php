@@ -36,8 +36,6 @@ class ProfissionalController extends Controller
             $query->with([
                 'servicos' => fn ($query) => $query->where('servicos.estabelecimento_id', $request->user()->estabelecimento_id)->orderBy('nome'),
                 'horarios' => fn ($query) => $query->orderBy('dia_semana')->orderBy('hora_inicio'),
-                'bloqueios' => fn ($query) =>
-                    $query->orderBy('inicio'),
                 'user',
             ]);
         }
@@ -79,7 +77,7 @@ class ProfissionalController extends Controller
     {
         $profissional = new Profissional($request->validated());
         $profissional->estabelecimento_id = $request->user()->estabelecimento_id;
-        $profissional->save();
+        DB::transaction(fn (): bool => $profissional->save());
 
         return $request->expectsJson()
         ? new ProfissionalResource($profissional->refresh())
