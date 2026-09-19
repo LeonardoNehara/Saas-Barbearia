@@ -17,7 +17,6 @@
         </aside>
         @endunless
         <div class="flex min-w-0 flex-col">
-            <x-admin-header :always-show-menu="$agendaWorkspace" />
             <main id="conteudo" tabindex="-1" class="w-full flex-1 px-4 py-7 outline-none sm:px-8 sm:py-10 lg:px-9">
                 <div @class(['mx-auto', 'max-w-[1440px]' => ! $agendaWorkspace])>
                     @if (session('status'))

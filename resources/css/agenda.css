@@ -1,15 +1,15 @@
 .agenda-dialog { margin: auto; width: min(94vw, 580px); max-height: 90svh; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; color: #1e293b; background: white; }
 .agenda-dialog::backdrop { background: rgb(15 23 42 / .5); }
-.agenda-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); align-items: start; gap: 24px; }
-.agenda-mini-month { width: 250px; max-width: 100%; padding: 8px 0; }
-.agenda-mini-month-heading { display: flex; align-items: center; gap: 4px; padding: 0 4px 10px; }
-.agenda-mini-month-heading h2 { flex: 1; font-size: 14px; font-weight: 600; }
+.agenda-layout { display: grid; grid-template-columns: 188px minmax(0, 1fr); align-items: start; gap: 18px; }
+.agenda-mini-month { width: 188px; max-width: 100%; padding: 6px 0; }
+.agenda-mini-month-heading { display: flex; align-items: center; gap: 3px; padding: 0 3px 8px; }
+.agenda-mini-month-heading h2 { flex: 1; font-size: 11px; font-weight: 600; }
 .agenda-mini-month-heading h2::first-letter { text-transform: uppercase; }
-.agenda-mini-month-heading button { width: 28px; height: 28px; border-radius: 50%; color: #626b78; font-size: 22px; line-height: 1; cursor: pointer; }
+.agenda-mini-month-heading button { width: 21px; height: 21px; border-radius: 50%; color: #626b78; font-size: 17px; line-height: 1; cursor: pointer; }
 .agenda-mini-month-weekdays, .agenda-mini-month-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; align-items: center; }
-.agenda-mini-month-weekdays span { display: grid; place-items: center; height: 28px; font-size: 10px; color: #626b78; }
-.agenda-mini-month-days { row-gap: 3px; }
-.agenda-mini-month-days button { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; font-size: 11px; cursor: pointer; }
+.agenda-mini-month-weekdays span { display: grid; place-items: center; height: 21px; font-size: 8px; color: #626b78; }
+.agenda-mini-month-days { row-gap: 2px; }
+.agenda-mini-month-days button { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; font-size: 9px; cursor: pointer; }
 .agenda-mini-month button:hover { background: #eee9e1; }
 .agenda-mini-month-days .agenda-mini-month-outside { color: #8b929d; }
 .agenda-mini-month-days button[aria-current="date"] { color: #87602e; box-shadow: inset 0 0 0 1px #b88c50; font-weight: 700; }
