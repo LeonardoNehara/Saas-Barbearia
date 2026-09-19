@@ -60,6 +60,13 @@
     background: #fff;
     color: #1e293b;
     box-shadow: 0 25px 50px -12px rgb(15 23 42 / 0.25);
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.admin-dialog::-webkit-scrollbar {
+    display: none;
 }
 
 .admin-dialog::backdrop {
